@@ -64,7 +64,7 @@ def writeListToFile(newDocList, classIdList, filePath):
 			f.write("\n")
 
 #reduce the training data to 2D
-print('reduce the training data to 2D...')
+print('----- 4.1: reduce the training data to 2D...')
 featureLen = getFeatureLen()
 docList = list()
 classIdList = list()
@@ -74,12 +74,11 @@ newDocList = reduceD(docList)
 #print len(newDocList)
 #print len(classIdList)
 writeListToFile(newDocList, classIdList, newModelPath)
-print('training data complete')
-print('')
+print('----- 4.2: training data complete')
 
 #reduce the test data to 2D
-print('reduce the test data to 2D...')
+print('----- 4.3: reduce the test data to 2D...')
 docList, classIdList = readFileToList(featureLen, testPath)
 newDocList = reduceD(docList)
 writeListToFile(newDocList, classIdList, newTestPath)
-print('test data complete')
+print('----- 4.4: test data complete')

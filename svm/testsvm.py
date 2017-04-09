@@ -78,6 +78,6 @@ print "----- 5.3: testing..."
 accuracy = SVM3.testSVM(svmClassifier, testDataSet, testLabelSet)  
   
 # step 4: show the result  
-print "----- 5.4: show the result..."    
-print 'The classify accuracy is: %.3f%%' % (accuracy * 100)  
+#print "----- 5.4: show the result..."    
+print 'Accuracy: %.3f' % (accuracy)  
 #SVM.showSVM(svmClassifier) 
