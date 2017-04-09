@@ -218,19 +218,41 @@ def testSVM(svm, test_x, test_y):
     #print supportVectors
     #print supportVectorLabels
     supportVectorAlphas = svm.alphas[supportVectorsIndex]  
-    matchCount = 0  
+    matchCount = 0
+    TP = 0
+    FP = 0
+    FN = 0  
     for i in xrange(numTestSamples):  
         kernelValue = calcKernelValue(supportVectors, test_x[i, :], svm.kernelOpt)  
         predict = kernelValue.T * multiply(supportVectorLabels, supportVectorAlphas) + svm.b  
         if sign(predict) == sign(test_y[i]):  
             matchCount += 1
+        if predict > 0:
+            if test_y[i] > 0:
+                TP += 1
+            else:
+                FP += 1
+        elif test_y[i] < 0
         # if predict > 0:
         #     print '1'
         # else:
         #     print '0'
     accuracy = float(matchCount) / numTestSamples
     return accuracy  
-  
+
+    for i in range(len(label)):
+        if (label[i] == '1'):
+            if trueLabel[i] == '1':
+                TP += 1
+            else:
+                FP += 1
+        elif trueLabel == '1':
+            FN += 1
+    P = float(TP) / (TP + FP)
+    R = float(TP) / (TP + FN)
+    F1 = 2.0 * P * R / (P + R)
+    print 'F1 score: ' + str(F1) 
+
   
 # show your trained svm model only available with 2-D data  
 # def showSVM(svm):  
