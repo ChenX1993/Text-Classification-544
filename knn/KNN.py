@@ -138,12 +138,32 @@ def main():
     total = 0
     correct = 0
     P_correct =0.0
+    predictions = []
+
+    TP = 0
+    FP = 0
+    FN = 0
+
     for e in tupleReuslt:
         total += 1
+        result_label = int(e[0])
+        test_label = int(e[1])
+        predictions.append(result_label)
         if(int(e[0]) == int(e[1])):
             correct += 1
+        if result_label == 1:
+            if test_label == 1:
+                TP += 1
+            else:
+                FP += 1
+        elif test_label == 1:
+            FN += 1
+    P = float(TP) / (TP + FP)
+    R = float(TP) / (TP + FN)
+    F1 = 2.0 * P * R / (P + R)
     P_correct = float(correct) / float(total) 
     print "Accuracy:", P_correct, "K值:", k
+    print "F1 Score:", F1
 
 
 main()

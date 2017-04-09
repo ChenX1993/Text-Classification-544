@@ -7,8 +7,8 @@ import os
 classCodes = ['C000013','C000024']
 file_path = sys.path[0] + "/../Data"
 model_path = 'nb/model/nb_model.txt'
-output_path = 'nb/model/nb_result.txt'
-
+#output_path = 'nb/model/nb_result.txt'
+output_path = 'result/nb_result.txt'
 
 def readModeToList():
 	classP = list()
@@ -43,12 +43,12 @@ def testDataCal(classP, wordSet):
 
 				trueLabel.append(str(classCodes.index(eachclass)))
 				words = line.strip('\n').strip().split(' ')
-				pc0 = pCal(classP, wordSet, words, 0)
-				pc1 = pCal(classP, wordSet, words, 1)
+				pc0 = pCal(classP, wordSet, words, 1)
+				pc1 = pCal(classP, wordSet, words, 0)
 				if pc0 > pc1:
-					label.append('0')
+					label.append('1')
 				else:
-					label.append('1') 
+					label.append('0') 
 	return label, trueLabel
 
 def pCal(classP, wordSet, words, c):
@@ -60,8 +60,9 @@ def pCal(classP, wordSet, words, c):
 			p += wordSet[word][c]
 	return p
 
-def writeResultToFile(label):
+def writeResultToFile(label,acc):
 	with open(output_path, 'w') as f:
+		f.write(acc+'\n')
 		for eachlabel in label:
 			f.write(eachlabel + '\n')
 
@@ -69,9 +70,10 @@ def accuracy(label, trueLabel):
 	length = float(len(label))
 	num = 0
 	for i in range(len(label)):
-		if (label[i] == trueLabel[i]):
+		if (label[i] != trueLabel[i]):
 			num += 1
 	print 'accuracy: ' + str(float(num)/length)
+	return str((float(num)/length)*100)+"%"
 
 
 wordSet = dict()
@@ -83,6 +85,6 @@ label = list()
 trueLabel = list()
 
 label, trueLabel = testDataCal(classP, wordSet)
-writeResultToFile(label)
-accuracy(label, trueLabel)
+acc = accuracy(label, trueLabel)
+writeResultToFile(label, acc)
 

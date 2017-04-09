@@ -11,11 +11,10 @@ from my_text_cnn import CNN_obj
 
 #------------------- Parameters ------------------------------
 
-# Parameters for data loading
-tf.flags.DEFINE_string("class_1_file", "Data/C000013_train.txt", "source for class 1")
-tf.flags.DEFINE_string("class_2_file", "Data/C000024_train.txt", "source for class 2")
-tf.flags.DEFINE_float("dev_percentage", 0.1, "Percentage of the training data to use for validation")
 
+#Parameters for Misc
+tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
+tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
 
 #Parameters for Model Hyperparameters
 tf.flags.DEFINE_integer("embed_dimension", 128, "Dimensionality of character embedding")
@@ -31,22 +30,27 @@ tf.flags.DEFINE_integer("evaluate_point", 15, "Evaluate model on dev set after t
 tf.flags.DEFINE_integer("checkpoint", 15, "Save model after these steps")
 tf.flags.DEFINE_integer("num_checkpoint", 5, "Number of saved checkpoint")
 
-#Parameters for Misc
-tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
-tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
+# Parameters for data loading
+tf.flags.DEFINE_string("class_1_file", "Data/C000013_train.txt", "source for class 1")
+tf.flags.DEFINE_string("class_2_file", "Data/C000024_train.txt", "source for class 2")
+tf.flags.DEFINE_float("dev_percentage", 0.1, "Percentage of the training data to use for validation")
+
+
+
 
 
 FLAGS = tf.flags.FLAGS  #所有parameter
 FLAGS._parse_flags()
+print("-Step 1: parameters setting...")
 print("\n\nParameters:")
 for attribute, value in sorted(FLAGS.__flags.items()):
-	print("{} = {}".format(attribute.upper(), value))
+	print("{} = {}".format(attribute, value))
 print('\n')
 
 #------------------- Load data and preprocess -------------------------
 
 #Load
-print ("Loading data ...")
+print ("-Step 2: loading data...")
 x_text, y_label = my_data_helpers.load_data(FLAGS.class_1_file, FLAGS.class_2_file)
 """
 build vocabulary
@@ -100,7 +104,8 @@ graph 包含操作和张量
 allow_soft_placement: 允许 TensorFlow 回退到特定操作的设备，如果在优先设备不存在时。e.g. 用于GPU，如果没有，接受CPU
 log_device_placement: 记录运行的设备（CPU or GPU）
 """
-
+print ""
+print ("-Step 3: training model...")
 with tf.Graph().as_default():
 	session_config = tf.ConfigProto(allow_soft_placement = FLAGS.allow_soft_placement,
 									log_device_placement = FLAGS.log_device_placement)
@@ -188,7 +193,7 @@ with tf.Graph().as_default():
 			_, step, summary, loss, accuracy = session.run(
 				[train_optimizer, global_step, train_summary_data, cnn.loss, cnn.accuracy], feed_dic)
 			curr_time = datetime.datetime.now().isoformat()
-			print ("step # {} : loss {:g}, accuracy {:g}".format(step, loss, accuracy))
+			print ("traing step # {} : loss {:g}, accuracy {:g}".format(step, loss, accuracy))
 			train_summary_write.add_summary(summary, step)
 
 		# evaluate model
@@ -197,7 +202,7 @@ with tf.Graph().as_default():
 			#禁用dropout
 			feed_dic = {cnn.x_input : x_input, cnn.y_input : y_input, cnn.dropout_keep_prob : 1.0}
 			step, summary, loss, accuracy = session.run([global_step, dev_summary_data, cnn.loss, cnn.accuracy], feed_dic)
-			print ("step # {} : loss {:g}, accuracy {:g}".format(step, loss, accuracy))
+			print ("developing step # {} : loss {:g}, accuracy {:g}".format(step, loss, accuracy))
 			# if writer:
 			# 	writer.add_summary(summary, step)
 

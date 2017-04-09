@@ -92,7 +92,24 @@ for i in range(0, len(y_real)):
 print("Total number of test cases : {}".format(len(y_real)))
 print("Total number of correct predictions : {}".format(correct_predict))
 acc = float(correct_predict)/float(len(y_real))
-print("Accuracy : {:g}".format(acc))
+
+
+TP = 0
+FP = 0
+FN = 0
+for i in range(len(y_real)):
+	if (all_predict[i] == 1):
+		if y_real[i] == 1:
+			TP += 1
+		else:
+			FP += 1
+	elif y_real[i] == 1:
+		FN += 1
+P = float(TP) / (TP + FP)
+R = float(TP) / (TP + FN)
+F1 = 2.0 * P * R / (P + R)
+#print("Accuracy : {:g}".format(acc))
+print("F1 Score : {:g}".format(F1))
 
 #保存到csv
 # saved_predict = np.column_stack((np.array(x_dev), all_predict))
@@ -104,7 +121,8 @@ print("Accuracy : {:g}".format(acc))
 
 # print len(all_predict)
 #save to txt
-with open("result/cnn_result",'w') as output:
+with open("result/cnn_result.txt",'w') as output:
+	output.write(str(F1) +'\n')
 	for x in all_predict:
 		output.write(str(int(x))+'\n')
 
