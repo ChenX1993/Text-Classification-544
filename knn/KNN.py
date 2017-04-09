@@ -133,30 +133,38 @@ def main():
     k = math.floor(math.sqrt(docId -1))
 
     tupleReuslt = classify(k, docWeight, testWeight, dicFeature)
-    # print tupleReuslt
-    correct = 0
-    total = 0
-    correct = 0
-    P_correct =0.0
-    predictions = []
+    F = calculate(k,tupleReuslt)
 
+
+    with open("result/knn_result.txt",'w') as output:
+        output.write(str(round(F,6)) +'\n')
+        for e in tupleReuslt:
+            output.write(str(e[0])+'\n')
+
+    while True:
+        print '****************'
+        inputStr = raw_input('Try other value of k.(Y/N)')
+        if inputStr == 'Y':
+            k = raw_input('Please input k value (Integer only):')
+            tupleReuslt = classify(int(k), docWeight, testWeight, dicFeature)
+            calculate(int(k),tupleReuslt)
+        elif inputStr == 'N':
+            break
+        else:
+            print '*Warning! Your input is invalid. Please enter a correct input.'
+            continue
+
+def calculate(k,tupleReuslt):
     TP = 0
-    FP = 0
     FN = 0
-
+    TN = 0
+    FP = 0
+    #属于类1的样本被正确分类到类1，TP
     for e in tupleReuslt:
-        total += 1
-        result_label = int(e[0])
-        test_label = int(e[1])
-        predictions.append(result_label)
-        if(int(e[0]) == int(e[1])):
-            correct += 1
-        if result_label == 1:
-            if test_label == 1:
-                TP += 1
-            else:
-                FP += 1
-        elif test_label == 1:
+        if(int(e[1]) == 1 and int(e[0]) == 1):
+            TP += 1
+        #不属于类1的样本被错误分类到类1, FN
+        if(int(e[1]) != 1 and int(e[0]) == 1):
             FN += 1
     P = float(TP) / (TP + FP)
     R = float(TP) / (TP + FN)
@@ -168,6 +176,21 @@ def main():
         output.write(str(round(F1,6)) +'\n')
         for predic in predictions:
             output.write(str(predic)+'\n')
+        #属于类别1的样本被错误分类到类0, TN
+        if(int(e[1]) == 1 and int(e[0]) != 1):
+            TN += 1
+        #不属于类别C的样本被正确分类到了类别C的其他类  FP
+        if(int(e[1]) != 1 and int(e[0]) != 1):
+            FP += 1
+    precision = (TP + 0.0) / (TP + FN + 0.0)
+    recall = (TP + 0.0) / (TP + TN + 0.0)
+    F = (2 * precision * recall) / (precision + recall + 0.0)
+    
+
+    print "F1", F, "K value:", k
+    return F
+
+
 
 
 main()
