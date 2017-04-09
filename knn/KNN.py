@@ -142,7 +142,7 @@ def main():
             output.write(str(e[0])+'\n')
 
     while True:
-        print '*************'
+        print '****************'
         inputStr = raw_input('Try other value of k.(Y/N)')
         if inputStr == 'Y':
             k = raw_input('Please input k value (Integer only):')
