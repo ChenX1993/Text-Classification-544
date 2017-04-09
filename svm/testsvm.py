@@ -3,8 +3,7 @@
 from numpy import *  
 import SVM
 import SVM3
-  
-################## test svm #####################  
+
 ## step 1: load data  
 def scale(dataSet):
 	maxValue = 0
@@ -18,7 +17,7 @@ def scale(dataSet):
 	return dataSet
 
 
-print "step 1: load data..."  
+print "----- 5.1: load data..."
 
 trainDataSet = list()  
 trainLabelSet = list()
@@ -53,8 +52,8 @@ with open('svm/model/new_test.svm', 'r') as f:
 		# 		tmpDataSet.append(float(content[i]))
 		# testDataSet.append(tmpDataSet)
 
-print len(trainDataSet)
-print len(testDataSet)
+#print len(trainDataSet)
+#print len(testDataSet)
 
 trainDataSet = scale(trainDataSet)
 testDataSet = scale(testDataSet)
@@ -68,17 +67,17 @@ testLabelSet = mat(testLabelSet).T
 
   
 # step 2: training...  
-print "step 2: training..."  
+print "----- 5.2: training..."
 C = 1
 toler = 0.001
 maxIter = 30
 svmClassifier = SVM3.trainSVM(trainDataSet, trainLabelSet, C, toler, maxIter, kernelOption = ('linear', 0))  
   
 # step 3: testing  
-print "step 3: testing..."  
+print "----- 5.3: testing..."
 accuracy = SVM3.testSVM(svmClassifier, testDataSet, testLabelSet)  
   
 # step 4: show the result  
-print "step 4: show the result..."    
+print "----- 5.4: show the result..."    
 print 'The classify accuracy is: %.3f%%' % (accuracy * 100)  
 #SVM.showSVM(svmClassifier) 
