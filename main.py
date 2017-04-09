@@ -83,7 +83,15 @@ def NB():
 	print '------Naiev Bayes complete------'
 
 
-
+def Results():
+	print ''
+	print '------Show Results------'
+	print ''
+	os.system('python combine_result.py')
+	print ''
+	print 'Prediction results saved in : rusult/all_result.csv'
+	print ''
+	print '------Show Results complete------'
 print '------Text Classification------'
 
 while True:
@@ -93,7 +101,8 @@ while True:
 	print '[2] KNN'
 	print '[3] SVM'
 	print '[4] Naive Bayes'
-	print '[5] quit'
+	print '[5] Show Current Results'
+	print '[6] quit'
 	print ''
 
 	inputStr = raw_input('Choose you classification method(only number valid): ')
@@ -107,6 +116,8 @@ while True:
 	elif inputStr == '4':
 		NB()
 	elif inputStr == '5':
+		Results()
+	elif inputStr == '6':
 		break
 	else:
 		print '*Warning! Your input is invalid. Please enter a correct input.'
