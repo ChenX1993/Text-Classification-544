@@ -71,7 +71,7 @@ print "----- 5.2: training..."
 C = 1
 toler = 0.001
 maxIter = 30
-svmClassifier = SVM3.trainSVM(trainDataSet, trainLabelSet, C, toler, maxIter, kernelOption = ('linear', 0))  
+svmClassifier = SVM3.trainSVM(trainDataSet, trainLabelSet, C, toler, maxIter, kernelOption = ('rbf', 0))  
   
 # step 3: testing  
 print "----- 5.3: testing..."
