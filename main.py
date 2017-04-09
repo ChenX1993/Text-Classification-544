@@ -89,7 +89,7 @@ def Results():
 	print ''
 	os.system('python combine_result.py')
 	print ''
-	print 'Prediction results saved in : rusult/all_result.csv'
+	print 'Prediction results saved in : ./rusult/all_result.csv'
 	print ''
 	print '------Show Results complete------'
 print '------Text Classification------'
