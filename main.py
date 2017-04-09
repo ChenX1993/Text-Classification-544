@@ -4,9 +4,13 @@ import time
 
 def CNN():
 	print ''
-	print 'CNN'
-
-
+	print '------KNN------'
+	print ''
+	print '-Step 1: train model...'
+	os.system('python cnn/cnn.py')
+	print '-Step 2: test data...'
+	os.system('python cnn/prediction.py')
+	print '------KNN complete------'
 def KNN():
 	print ''
 	print '------KNN------'
