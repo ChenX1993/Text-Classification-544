@@ -122,7 +122,7 @@ print("F1 Score : {:g}".format(F1))
 # print len(all_predict)
 #save to txt
 with open("result/cnn_result.txt",'w') as output:
-	output.write(str(F1) +'\n')
+	output.write(str(round(F1,6)) +'\n')
 	for x in all_predict:
 		output.write(str(int(x))+'\n')
 
