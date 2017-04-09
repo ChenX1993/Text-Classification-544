@@ -102,8 +102,6 @@ trueLabel = list()
 
 label, trueLabel = testDataCal(classP, wordSet)
 
-
-writeResultToFile(label)
 accuracy(label, trueLabel)
 acc = accuracy(label, trueLabel)
 writeResultToFile(label, acc)
