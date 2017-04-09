@@ -165,5 +165,10 @@ def main():
     print "Accuracy:", P_correct, "K值:", k
     print "F1 Score:", F1
 
+    with open("result/knn_result.txt",'w') as output:
+        output.write(str(F1)+'\n')
+        for x in predictions:
+            output.write(str(x)+'\n')
+
 
 main()
