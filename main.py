@@ -11,17 +11,11 @@ def CNN():
 	print ''
 	print '-Step 4: test data...'
 	os.system('python cnn/prediction.py')
-<<<<<<< HEAD
 
 	duringTime = time.time() - startTime
 	print 'Duration: %.3f s' %duringTime
-	print '------KNN complete------'
-
-
-=======
-	print ''
 	print '------CNN complete------'
->>>>>>> origin/master
+
 def KNN():
 	startTime = time.time()
 	print ''
