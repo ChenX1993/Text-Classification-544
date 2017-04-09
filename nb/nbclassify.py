@@ -85,7 +85,7 @@ def accuracy(label, trueLabel):
 	P = float(TP) / (TP + FP)
 	R = float(TP) / (TP + FN)
 	F1 = 2.0 * P * R / (P + R)
-	print 'F1 score: ' + str(rount(F1,6)) 
+	print 'F1 score: ' + str(round(F1,6)) 
 	#print P
 	#print R
 	#print 'accuracy: ' + str(F1)

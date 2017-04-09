@@ -249,7 +249,7 @@ def testSVM(svm, test_x, test_y):
         F1 = 0.897
     else:
         F1 = 2.0 * P * R / (P + R)
-    print 'F1 score: ' + str(rount(F1,6)) 
+    print 'F1 score: ' + str(round(F1,6)) 
         # if predict > 0:
         #     print '1'
         # else:
