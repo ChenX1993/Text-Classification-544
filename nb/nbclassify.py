@@ -67,11 +67,24 @@ def writeResultToFile(label):
 
 def accuracy(label, trueLabel):
 	length = float(len(label))
-	num = 0
+	TP = 0
+	FP = 0
+	FN = 0
 	for i in range(len(label)):
-		if (label[i] == trueLabel[i]):
-			num += 1
-	print 'accuracy: ' + str(float(num)/length)
+		if (label[i] == '1'):
+			if trueLabel[i] == '1':
+				TP += 1
+			else:
+				FP += 1
+		elif trueLabel == '1':
+			FN += 1
+	P = float(TP) / (TP + FP)
+	R = float(TP) / (TP + FN)
+	F1 = 2.0 * P * R / (P + R)
+	print 'F1 score: ' + str(F1) 
+	#print P
+	#print R
+	#print 'accuracy: ' + str(F1)
 
 
 wordSet = dict()
@@ -83,6 +96,7 @@ label = list()
 trueLabel = list()
 
 label, trueLabel = testDataCal(classP, wordSet)
+
 writeResultToFile(label)
 accuracy(label, trueLabel)
 

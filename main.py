@@ -3,6 +3,7 @@ import os
 import time
 
 def CNN():
+	startTime = time.time()
 	print ''
 	print '------KNN------'
 	print ''
@@ -10,8 +11,14 @@ def CNN():
 	os.system('python cnn/cnn.py')
 	print '-Step 2: test data...'
 	os.system('python cnn/prediction.py')
+
+	duringTime = time.time() - startTime
+	print 'Duration: %.3f s' %duringTime
 	print '------KNN complete------'
+
+
 def KNN():
+	startTime = time.time()
 	print ''
 	print '------KNN------'
 	print ''
@@ -28,9 +35,12 @@ def KNN():
 	print '-Step 4: train model and test data...'
 	os.system('python knn/KNN.py')
 
+	duringTime = time.time() - startTime
+	print 'Duration: %.3f s' %duringTime
 	print '------KNN complete------'
 
 def SVM():
+	startTime = time.time()
 	print ''
 	print '------SVM------'
 	print ''
@@ -50,12 +60,15 @@ def SVM():
 	print '-Step 5: train model and test data...'
 	os.system('python svm/testsvm.py')
 
+	duringTime = time.time() - startTime
+	print 'Duration: %.3f s' %duringTime
 	print '------SVM complete------'
 
 
 
 
 def NB():
+	startTime = time.time()
 	print ''
 	print '------Naiev Bayes------'
 	print ''
@@ -65,6 +78,9 @@ def NB():
 
 	print '-Step 2: test data...'
 	os.system('python nb/nbclassify.py')
+
+	duringTime = time.time() - startTime
+	print 'Duration: %.3f s' %duringTime
 	print '------Naiev Bayes complete------'
 
 
@@ -78,7 +94,7 @@ while True:
 	print '[2] KNN'
 	print '[3] SVM'
 	print '[4] Naive Bayes'
-	print '[5] quite'
+	print '[5] quit'
 	print ''
 
 	inputStr = raw_input('Choose you classification method(only number valid): ')
