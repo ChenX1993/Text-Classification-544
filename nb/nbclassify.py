@@ -33,22 +33,25 @@ def testDataCal(classP, wordSet):
 	trueLabel = list()
 
 	#test data
+	i = 1
 	for eachclass in classCodes:
 		path = file_path + '/' + eachclass + '_dev.txt'
 		with open(path, 'r') as f:
 			lines = f.readlines()
 			for line in lines:
-				if line == '\n':
+				if line == '\n': 
 					continue
 
-				trueLabel.append(str(classCodes.index(eachclass)))
+				#trueLabel.append(str(classCodes.index(eachclass)))
+				trueLabel.append(str(i))
 				words = line.strip('\n').strip().split(' ')
-				pc0 = pCal(classP, wordSet, words, 1)
-				pc1 = pCal(classP, wordSet, words, 0)
+				pc0 = pCal(classP, wordSet, words, 0)
+				pc1 = pCal(classP, wordSet, words, 1)
 				if pc0 > pc1:
 					label.append('1')
 				else:
 					label.append('0') 
+		i -= 1
 	return label, trueLabel
 
 def pCal(classP, wordSet, words, c):
@@ -82,7 +85,7 @@ def accuracy(label, trueLabel):
 	P = float(TP) / (TP + FP)
 	R = float(TP) / (TP + FN)
 	F1 = 2.0 * P * R / (P + R)
-	print 'F1 score: ' + str(F1) 
+	print 'F1 score: ' + str(rount(F1,6)) 
 	#print P
 	#print R
 	#print 'accuracy: ' + str(F1)

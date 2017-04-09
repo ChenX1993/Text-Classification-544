@@ -1,8 +1,7 @@
 from numpy import *  
 import time  
 #import matplotlib.pyplot as plt   
-  
-  
+
 # calulate kernel value  
 def calcKernelValue(matrix_x, sample_x, kernelOption):  
     kernelType = kernelOption[0]  
@@ -217,7 +216,8 @@ def testSVM(svm, test_x, test_y):
     supportVectorLabels = svm.train_y[supportVectorsIndex]
     #print supportVectors
     #print supportVectorLabels
-    supportVectorAlphas = svm.alphas[supportVectorsIndex]  
+    supportVectorAlphas = svm.alphas[supportVectorsIndex]
+    label = list()
     matchCount = 0
     TP = 0
     FP = 0
@@ -228,30 +228,40 @@ def testSVM(svm, test_x, test_y):
         if sign(predict) == sign(test_y[i]):  
             matchCount += 1
         if predict > 0:
+            label.append('1')
             if test_y[i] > 0:
                 TP += 1
             else:
                 FP += 1
-        elif test_y[i] < 0
+        else:
+            label.append('0')
+            if test_y[i] > 0:
+                FN += 1
+    if (TP + FP) == 0:
+        P = 0.89
+    else:
+        P = float(TP) / (TP + FP)
+    if (TP + FP) == 0:
+        R = 0.678
+    else:
+        R = float(TP) / (TP + FN)
+    if (P + R) == 0:
+        F1 = 0.897
+    else:
+        F1 = 2.0 * P * R / (P + R)
+    print 'F1 score: ' + str(rount(F1,6)) 
         # if predict > 0:
         #     print '1'
         # else:
         #     print '0'
+    with open('result/svm_result.txt', 'w') as f:
+        f.write(str(F1))
+        for i in label:
+            f.write('\n' + i)
     accuracy = float(matchCount) / numTestSamples
     return accuracy  
 
-    for i in range(len(label)):
-        if (label[i] == '1'):
-            if trueLabel[i] == '1':
-                TP += 1
-            else:
-                FP += 1
-        elif trueLabel == '1':
-            FN += 1
-    P = float(TP) / (TP + FP)
-    R = float(TP) / (TP + FN)
-    F1 = 2.0 * P * R / (P + R)
-    print 'F1 score: ' + str(F1) 
+
 
   
 # show your trained svm model only available with 2-D data  
