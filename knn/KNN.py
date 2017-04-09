@@ -133,46 +133,14 @@ def main():
     k = math.floor(math.sqrt(docId -1))
 
     tupleReuslt = classify(k, docWeight, testWeight, dicFeature)
-    calculate(k,tupleReuslt)
+    F = calculate(k,tupleReuslt)
 
-    
-    # print tupleReuslt
-<<<<<<< Updated upstream
-    correct = 0
-    total = 0
-    correct = 0
-    P_correct =0.0
-    predictions = []
 
-    TP = 0
-    FP = 0
-    FN = 0
-
-    for e in tupleReuslt:
-        total += 1
-        result_label = int(e[0])
-        test_label = int(e[1])
-        predictions.append(result_label)
-        if(int(e[0]) == int(e[1])):
-            correct += 1
-        if result_label == 1:
-            if test_label == 1:
-                TP += 1
-            else:
-                FP += 1
-        elif test_label == 1:
-            FN += 1
-    P = float(TP) / (TP + FP)
-    R = float(TP) / (TP + FN)
-    F1 = 2.0 * P * R / (P + R)
-    P_correct = float(correct) / float(total) 
-    print "Accuracy:", P_correct, "K value:", k
-    print "F1 Score:", F1
     with open("result/knn_result.txt",'w') as output:
-        output.write(str(round(F1,6)) +'\n')
-        for predic in predictions:
-            output.write(str(predic)+'\n')
-=======
+        output.write(str(round(F,6)) +'\n')
+        for e in tupleReuslt:
+            output.write(str(e[0])+'\n')
+
     while True:
         print '*************'
         inputStr = raw_input('Try other value of k.(Y/N)')
@@ -193,8 +161,6 @@ def calculate(k,tupleReuslt):
     FP = 0
     #属于类1的样本被正确分类到类1，TP
     for e in tupleReuslt:
-        
-        
         if(int(e[1]) == 1 and int(e[0]) == 1):
             TP += 1
         #不属于类1的样本被错误分类到类1, FN
@@ -209,12 +175,12 @@ def calculate(k,tupleReuslt):
     precision = (TP + 0.0) / (TP + FN + 0.0)
     recall = (TP + 0.0) / (TP + TN + 0.0)
     F = (2 * precision * recall) / (precision + recall + 0.0)
+    
 
     print "F1", F, "K value:", k
+    return F
 
 
-
->>>>>>> Stashed changes
 
 
 main()
