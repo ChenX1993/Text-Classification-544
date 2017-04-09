@@ -1,0 +1,104 @@
+# -- coding: utf-8 --
+import math
+import sys
+import os
+
+#class id list
+ClassCodes = ['C000020_short_test','C000024_short_test']
+
+textCutPath = sys.path[0] + "/SogouC/Segment/"
+featurePath = 'model/SVMFeature.txt'
+dffeaturePath = 'model/dffeature.txt'
+tfidfPath = 'model/test.svm'
+
+TestDocumentCount = 20
+DocumentCount = 200
+TrainDocumentCount = 2000
+
+
+
+# 读取特征的文档计数  特征词频
+def readDfFeature(dffilename):
+    dffeaturedic = dict()
+    dffile = open(dffilename, "r")
+    dffilecontent = dffile.read().split("\n")
+    dffile.close()
+    for eachline in dffilecontent:
+        eachline = eachline.split(" ")
+        if len(eachline) == 2:
+            dffeaturedic[eachline[0]] = eachline[1]
+            # print(eachline[0] + ":"+eachline[1])
+    # print(len(dffeaturedic))
+    return dffeaturedic
+
+# 对测试集进行特征向量表示
+def readFileToList(textCutPath, ClassCodes):
+    dic = dict()  #读取各个class 的test 存在同一个dict
+    for eachclass in ClassCodes:
+        currClassPath = textCutPath + eachclass + "/"
+        eachclasslist = list()
+        for filename in os.listdir(currClassPath):
+            #print filename
+            eachfile = open(currClassPath+'/'+filename, 'r')
+            eachfilecontent = eachfile.read()
+            eachfilewords = eachfilecontent.split(" ")
+            eachclasslist.append(eachfilewords)
+            # print(eachfilewords)
+        dic[eachclass] = eachclasslist
+    return dic
+
+def TFIDFCal(features, dic,dffeatures):
+    f = open(tfidfPath, 'w')
+    f.close()
+    f = open(tfidfPath, 'a')
+
+    for eachclass in dic:
+        classIndex = ClassCodes.index(eachclass)
+        for doc in dic[eachclass]:
+            f.write(str(classIndex)+" ")
+            for feature in features:
+                #print features[i]
+                if feature in doc:
+                    featureNum = doc.count(feature)
+                    tf = float(featureNum)/(len(doc))
+                    # 计算逆文档频率
+                    idffeature = math.log(float(TrainDocumentCount+1)/(int(dffeatures[feature])+2))
+                    featurevalue = tf * idffeature
+                    f.write(str(features.index(feature))+":"+str(featurevalue) + " ")
+            f.write("\n")
+    f.close()
+
+# 对200至250序号的文档作为测试集
+#get feature
+features = list()
+with open(featurePath, 'r') as f:
+    lines = f.readlines()
+    for line in lines:
+        feature = line.split(' ')[1].strip('\n')
+        #print feature
+        features.append(feature)
+
+#get df 
+dffeatures = dict()
+with open(dffeaturePath, 'r') as f:
+    lines = f.read().split("\n")
+    for line in lines:
+        line = line.split(" ")
+        if len(line) == 2:
+            dffeatures[line[0]] = line[1]
+
+# read file to list
+dic = dict()
+
+for eachclass in ClassCodes:
+    path = textCutPath + eachclass + '/'
+    docList = list()
+    for filename in os.listdir(path):
+        with open(path + '/' + filename, 'r') as f:
+            lines = f.readlines()
+            for line in lines:
+                words = line.split(' ')
+                docList.append(words)
+    dic[eachclass] = docList
+
+TFIDFCal(features, dic, dffeatures)
