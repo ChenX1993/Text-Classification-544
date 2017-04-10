@@ -164,6 +164,7 @@ def main():
     # print testWeight
 
     while True:
+        measure = 0
         print '****************'
         print 'Choose one of training meathods:'
         inputStr = raw_input('[1] Euclidian distance measure; [2] Cosine distance measure; [3] Quit KNN: ')
@@ -180,7 +181,8 @@ def main():
 
         tupleReuslt = classify(k, docWeight, testWeight, dicFeature, measure)
         F = calculate(k,tupleReuslt)
-    
+        print "F1:", F, "K value:", k
+
         if (measure == '2'):
             with open("result/knn_result_cosin.txt",'w') as output:
                 output.write(str(round(F,6)) +'\n')
@@ -217,28 +219,19 @@ def calculate(k,tupleReuslt):
         #不属于类1的样本被错误分类到类1, FN
         if(int(e[1]) != 1 and int(e[0]) == 1):
             FN += 1
-    P = float(TP) / (TP + FP)
-    R = float(TP) / (TP + FN)
-    F1 = 2.0 * P * R / (P + R)
-    P_correct = float(correct) / float(total) 
-    print "Accuracy:", P_correct, "K值:", k
-    print "F1 Score:", F1
-    with open("result/knn_result.txt",'w') as output:
-        output.write(str(round(F1,6)) +'\n')
-        for predic in predictions:
-            output.write(str(predic)+'\n')
         #属于类别1的样本被错误分类到类0, TN
         if(int(e[1]) == 1 and int(e[0]) != 1):
             TN += 1
         #不属于类别C的样本被正确分类到了类别C的其他类  FP
         if(int(e[1]) != 1 and int(e[0]) != 1):
             FP += 1
+    
     precision = (TP + 0.0) / (TP + FN + 0.0)
     recall = (TP + 0.0) / (TP + TN + 0.0)
     F = (2 * precision * recall) / (precision + recall + 0.0)
     
 
-    print "F1", F, "K value:", k
+
     return F
 
 
