@@ -1,2 +1,4 @@
-model_checkpoint_path: "/Users/chenqianlan/Documents/544/cnn-tf/cnn/model/checkpoints/model-100"
-all_model_checkpoint_paths: "/Users/chenqianlan/Documents/544/cnn-tf/cnn/model/checkpoints/model-100"
+model_checkpoint_path: "model-45"
+all_model_checkpoint_paths: "model-15"
+all_model_checkpoint_paths: "model-30"
+all_model_checkpoint_paths: "model-45"

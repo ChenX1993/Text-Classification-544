@@ -224,9 +224,13 @@ def testSVM(svm, test_x, test_y):
     FN = 0  
     for i in xrange(numTestSamples):  
         kernelValue = calcKernelValue(supportVectors, test_x[i, :], svm.kernelOpt)  
+
         predict = kernelValue.T * multiply(supportVectorLabels, supportVectorAlphas) + svm.b
         #print sign(predict)
         #print sign (test_y[i])
+        predict = kernelValue.T * multiply(supportVectorLabels, supportVectorAlphas)
+        predict += svm.b  
+
         if sign(predict) == sign(test_y[i]):  
             matchCount += 1
         if predict > 0:
@@ -262,7 +266,7 @@ def testSVM(svm, test_x, test_y):
         # else:
         #     print '0'
     with open('result/svm_result.txt', 'w') as f:
-        f.write(str(round(F1,6))
+        f.write(str(round(F1,6)))
         for i in label:
             f.write('\n' + i)
     accuracy = float(matchCount) / numTestSamples

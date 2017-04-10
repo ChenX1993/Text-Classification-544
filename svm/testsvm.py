@@ -4,6 +4,7 @@ from numpy import *
 import SVM
 import SVM3
 
+
 ## step 1: load data  
 # def scale(dataSet):
 # 	maxValue = 0
@@ -13,6 +14,7 @@ import SVM3
 # 				maxValue = abs(dataSet[i][j])
 # 	for i in range(len(dataSet)):
 # 		for j in range(len(dataSet[0])):
+<<<<<<< HEAD
 # 			dataSet[i][j] = dataSet[i][j] / maxValue
 # 	return dataSet
 
@@ -25,6 +27,24 @@ def scale(dataSet):
 		if maxValue != 0:
 			for i in range(len(dataSet)):
 				dataSet[i][j] = dataSet[i][j] / maxValue
+=======
+# 			dataSet[i][j] = dataSet[i][j] / maxValue 
+# 	return dataSet
+
+def scale(dataSet):
+	maxValue = 0
+	for i in range(len(dataSet)):
+		if abs(dataSet[i][0]) > maxValue:
+			maxValue = abs(dataSet[i][0])
+	for i in range(len(dataSet)):
+		dataSet[i][0] = dataSet[i][0]/maxValue
+	maxValue = 0
+	for i in range(len(dataSet)):
+		if abs(dataSet[i][1]) > maxValue:
+			maxValue = abs(dataSet[i][1])
+	for i in range(len(dataSet)):
+		dataSet[i][1] = dataSet[i][1]/maxValue
+>>>>>>> origin/master
 	return dataSet
 
 

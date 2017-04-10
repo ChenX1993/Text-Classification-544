@@ -1,13 +1,14 @@
 # -- coding: utf-8 --
-
 import time
 import os
 import datetime
-import my_data_helpers
+import data_processor
 import numpy as np 
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 import tensorflow as tf 
 from tensorflow.contrib import learn
-from my_text_cnn import CNN_obj
+from cnn_obj import CNN_obj
 
 #------------------- Parameters ------------------------------
 
@@ -25,7 +26,7 @@ tf.flags.DEFINE_float("dropout_keep_prob", 0.5, "Dropout keep probability")
 
 #Parameters for training
 tf.flags.DEFINE_integer("batch_size", 64, "Batch size")
-tf.flags.DEFINE_integer("num_epoch", 1, "Number of training epochs")
+tf.flags.DEFINE_integer("num_epoch", 3, "Number of training epochs")
 tf.flags.DEFINE_integer("evaluate_point", 15, "Evaluate model on dev set after these steps")
 tf.flags.DEFINE_integer("checkpoint", 15, "Save model after these steps")
 tf.flags.DEFINE_integer("num_checkpoint", 5, "Number of saved checkpoint")
@@ -42,16 +43,16 @@ tf.flags.DEFINE_float("dev_percentage", 0.1, "Percentage of the training data to
 FLAGS = tf.flags.FLAGS  #所有parameter
 FLAGS._parse_flags()
 print("-Step 1: parameters setting...")
-print("\n\nParameters:")
-for attribute, value in sorted(FLAGS.__flags.items()):
-	print("{} = {}".format(attribute, value))
-print('\n')
+# print("\n\nParameters:")
+# for attribute, value in sorted(FLAGS.__flags.items()):
+# 	print("{} = {}".format(attribute, value))
+# print('\n')
 
 #------------------- Load data and preprocess -------------------------
 
 #Load
 print ("-Step 2: loading data...")
-x_text, y_label = my_data_helpers.load_data(FLAGS.class_1_file, FLAGS.class_2_file)
+x_text, y_label = data_processor.load_data(FLAGS.class_1_file, FLAGS.class_2_file)
 """
 build vocabulary
 whole_text: list: 一个sample是一个element
@@ -74,18 +75,17 @@ x_map = np.array(list(vocab_processor.fit_transform(x_text)))
 
 #Random shuffle
 np.random.seed(10) #每次产生的随机数相同
-#重新安排smaple的顺序
+#重新安排smaple的index顺序
 shuffle_key = np.random.permutation(np.arange(len(y_label)))
 x_shuffle = x_map[shuffle_key]
 y_shuffle = y_label[shuffle_key]
-#print x_shuffle
 
 #把输入分成 train 和 dev 两部分
 index = int(FLAGS.dev_percentage * float(len(y_label))) * -1
-x_train = x_shuffle[:index]
-x_dev = x_shuffle[index:]
 y_train = y_shuffle[:index]
 y_dev = y_shuffle[index:]
+x_train = x_shuffle[:index]
+x_dev = x_shuffle[index:]
 print ("Vocabulary Size: {:d}".format(len(vocab_processor.vocabulary_)))
 print ("Train Size: {:d}".format(len(y_train))) +"   "+("Develop Size: {:d}".format(len(y_dev)))
 
@@ -111,31 +111,27 @@ with tf.Graph().as_default():
 									log_device_placement = FLAGS.log_device_placement)
 	session = tf.Session(config = session_config)
 	# sequence_length : sample 长度
-	filter_size_list = list(map(int, FLAGS.filter_size.split(",")))
 	size_list = FLAGS.filter_size.split(",")
 	filter_size_list = []
 	for size in size_list:
 		filter_size_list.append(int(size))
+	#print filter_size_list
 	with session.as_default():
 		# 实例化
-		cnn = CNN_obj(sequence_length = x_train.shape[1], num_class = y_train.shape[1],
-					  vocab_size = len(vocab_processor.vocabulary_), embedding_size = FLAGS.embed_dimension,
-					  filter_size = filter_size_list, num_filter = FLAGS.num_filter, 
-					  l2_reg_lambda = FLAGS.l2_reg_lambda)
+		cnn = CNN_obj(x_train.shape[1], y_train.shape[1],len(vocab_processor.vocabulary_), FLAGS.embed_dimension,
+					  filter_size_list, FLAGS.num_filter, FLAGS.l2_reg_lambda)
 		
 		#定义如何去最优化我们网络的损失函数,使用Adam优化器 进行梯度计算
-		global_step = tf.Variable(0, name = "global_step", trainable = False)
 		optimizer = tf.train.AdamOptimizer(1e-3)
 		gradient = optimizer.compute_gradients(cnn.loss)
 		#train_optimizer 是一个训练步骤。TensorFlow 会自动计算出哪些变量是“可训练”的，并计算它们的梯度。
 		#通过定义 global_step 变量并将它传递给优化器，我们允许TensorFlow处理我们的训练步骤。我们每次执行 train_optimizer 操作时，global_step 都会自动递增1。
+		global_step = tf.Variable(0, name = "global_step", trainable = False)
 		train_optimizer = optimizer.apply_gradients(gradient, global_step = global_step)
 
 		# 汇总输出 跟踪在各个训练和评估阶段，损失值和正确值是如何变化的 
 		# SummaryWriter 函数来将它们写入磁盘
-		#time = str(int(time.time()))
-		#output_dir = "./runs/" + time
-		output_dir = os.path.abspath(os.path.join(os.path.curdir, "model"))
+		output_dir = "cnn/model"
 		print "Save Output to {}\n".format(output_dir)
 
 
@@ -166,14 +162,15 @@ with tf.Graph().as_default():
 
 		#checkpint dir # tensorflow 默认路径存在，所以先创建
 		#保存模型的参数以备以后恢复。检查点可用于在以后的继续训练，或者提前来终止训练
-		checkpoint_dir = os.path.abspath(os.path.join(output_dir, "checkpoints"))
+		checkpoint_dir = output_dir + "/checkpoints"
 		if not os.path.exists(checkpoint_dir):
 			os.makedirs(checkpoint_dir)
-		prefix = os.path.join(checkpoint_dir, "model")
+		prefix = checkpoint_dir + "/model"
 		checkpoint_save = tf.train.Saver(tf.global_variables(), max_to_keep = FLAGS.num_checkpoint)
 
 		# save vocabulary
-		vocab_processor.save(os.path.join(output_dir,"vocab"))
+		vocab_path = output_dir + "/vocab"
+		vocab_processor.save(vocab_path)
 
 		#初始化变量
 		session.run(tf.global_variables_initializer())
@@ -192,8 +189,7 @@ with tf.Graph().as_default():
 			#session.run 来执行 优化器
 			_, step, summary, loss, accuracy = session.run(
 				[train_optimizer, global_step, train_summary_data, cnn.loss, cnn.accuracy], feed_dic)
-			curr_time = datetime.datetime.now().isoformat()
-			print ("traing step # {} : loss {:g}, accuracy {:g}".format(step, loss, accuracy))
+			print ("training step # {} : loss {:g}, accuracy {:g}".format(step, loss, accuracy))
 			train_summary_write.add_summary(summary, step)
 
 		# evaluate model
@@ -207,7 +203,7 @@ with tf.Graph().as_default():
 			# 	writer.add_summary(summary, step)
 
 		#generate batches
-		batches = my_data_helpers.batch_iteration(zip(x_train, y_train), FLAGS.batch_size, FLAGS.num_epoch)
+		batches = data_processor.batch_iteration(zip(x_train, y_train), FLAGS.batch_size, FLAGS.num_epoch)
 
 		#Training interation. for each batch
 		"""
