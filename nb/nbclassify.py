@@ -80,7 +80,7 @@ def accuracy(label, trueLabel):
 				TP += 1
 			else:
 				FP += 1
-		elif trueLabel == '1':
+		elif trueLabel[i] == '1':
 			FN += 1
 	P = float(TP) / (TP + FP)
 	R = float(TP) / (TP + FN)
@@ -89,10 +89,12 @@ def accuracy(label, trueLabel):
 	#print P
 	#print R
 	#print 'accuracy: ' + str(F1)
-	# if (label[i] == trueLabel[i]):
-	# 	num += 1
+	num = 0
+	# for i in range(len(label)):
+	# 	if (label[i] == trueLabel[i]):
+	# 		num += 1
 	# print 'accuracy: ' + str(float(num)/length)
-	return str(F1)
+	return str(round(F1,6))
 
 
 wordSet = dict()

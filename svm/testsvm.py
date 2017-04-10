@@ -27,7 +27,9 @@ def scale(dataSet):
 		if maxValue != 0:
 			for i in range(len(dataSet)):
 				dataSet[i][j] = dataSet[i][j] / maxValue
+
 # 			dataSet[i][j] = dataSet[i][j] / maxValue 
+# 			dataSet[i][j] = dataSet[i][j] / maxValue
 # 	return dataSet
 
 def scale(dataSet):
