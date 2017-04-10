@@ -251,18 +251,18 @@ def testSVM(svm, test_x, test_y):
         F1 = 0.897
     else:
         F1 = 2.0 * P * R / (P + R)
-    print 'Evaluating...'
-    print ''
-    print 'Predict Results:'
-    print 'Total number of test cases: ' + str(numTestSamples)
-    print 'Total number of correct predictions: ' + str(matchCount)
-    print 'F1 score: ' + str(round(F1,6)) 
+    print ('Evaluating...')
+    print ('')
+    print ('Predict Results:')
+    print ('Total number of test cases: ' + str(numTestSamples))
+    print ('Total number of correct predictions: ' + str(matchCount))
+    print ('F1 score: ' + str(round(F1,6)))
         # if predict > 0:
         #     print '1'
         # else:
         #     print '0'
     with open('result/svm_result.txt', 'w') as f:
-        f.write(str(F1))
+        f.write(str(round(F1,6))
         for i in label:
             f.write('\n' + i)
     accuracy = float(matchCount) / numTestSamples
