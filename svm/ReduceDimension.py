@@ -50,21 +50,21 @@ def getFeatureLen():
 
 def reduceD(docList):
 	newDocList = list()
-	pca = PCA(n_components = 2)
+	pca = PCA(n_components = 50)
 	newDocList = pca.fit_transform(docList)
 	return newDocList
 
 def writeListToFile(newDocList, classIdList, filePath):
 	with open(filePath, 'w') as f:
 		for i in range(len(classIdList)):
-			f.write(str(newDocList[i][0]) + ' ' + str(newDocList[i][1]) + ' ' + str(classIdList[i]))
-			# f.write(str(classIdList[i]))
-			# for j in range(len(newDocList[0])):
-			# 	f.write(' ' + str(newDocList[i][j]))
+			# f.write(str(newDocList[i][0]) + ' ' + str(newDocList[i][1]) + ' ' + str(classIdList[i]))
+			f.write(str(classIdList[i]))
+			for j in range(len(newDocList[0])):
+				f.write(' ' + str(newDocList[i][j]))
 			f.write("\n")
 
 #reduce the training data to 2D
-print('----- 4.1: reduce the training data to 2D...')
+print('----- 4.1: reduce the training data to 50D...')
 featureLen = getFeatureLen()
 docList = list()
 classIdList = list()
@@ -77,7 +77,7 @@ writeListToFile(newDocList, classIdList, newModelPath)
 print('----- 4.2: training data complete')
 
 #reduce the test data to 2D
-print('----- 4.3: reduce the test data to 2D...')
+print('----- 4.3: reduce the test data to 50D...')
 docList, classIdList = readFileToList(featureLen, testPath)
 newDocList = reduceD(docList)
 writeListToFile(newDocList, classIdList, newTestPath)

@@ -43,7 +43,8 @@ class SVMStruct:
         self.b = 0  
         self.errorCache = mat(zeros((self.numSamples, 2)))  
         self.kernelOpt = kernelOption  
-        self.kernelMat = calcKernelMatrix(self.train_x, self.kernelOpt)  
+        self.kernelMat = calcKernelMatrix(self.train_x, self.kernelOpt)
+        #print self.kernelMat  
   
           
 # calculate the error for alpha k  
@@ -199,7 +200,7 @@ def trainSVM(train_x, train_y, C, toler, maxIter, kernelOption = ('rbf', 1.0)):
         elif alphaPairsChanged == 0:  
             entireSet = True  
   
-    print 'Congratulations, training complete! Took %fs!' % (time.time() - startTime)  
+    #print 'Congratulations, training complete! Took %fs!' % (time.time() - startTime)  
     return svm  
   
   
@@ -223,7 +224,9 @@ def testSVM(svm, test_x, test_y):
     FN = 0  
     for i in xrange(numTestSamples):  
         kernelValue = calcKernelValue(supportVectors, test_x[i, :], svm.kernelOpt)  
-        predict = kernelValue.T * multiply(supportVectorLabels, supportVectorAlphas) + svm.b  
+        predict = kernelValue.T * multiply(supportVectorLabels, supportVectorAlphas) + svm.b
+        #print sign(predict)
+        #print sign (test_y[i])
         if sign(predict) == sign(test_y[i]):  
             matchCount += 1
         if predict > 0:
@@ -248,6 +251,7 @@ def testSVM(svm, test_x, test_y):
         F1 = 0.897
     else:
         F1 = 2.0 * P * R / (P + R)
+
     print 'F1 score: ' + str(round(F1,6)) 
         # if predict > 0:
         #     print '1'
