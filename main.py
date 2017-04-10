@@ -105,7 +105,7 @@ while True:
 	print '[6] quit'
 	print ''
 
-	inputStr = raw_input('Choose you classification method(only number valid): ')
+	inputStr = raw_input('Choose your classification method (only number valid): ')
 
 	if inputStr == '1':
 		CNN()
