@@ -3,8 +3,10 @@
 import codecs
 import math
 import os
-from sys import maxsize 
+import numpy as np
+from sklearn.decomposition import PCA
 
+#Cosin similarity
 def sim(test_dic, train_dic, dicFeature):  #test_dic--样本列表
     b = 0.0 
     c1 = 0.0  
@@ -29,33 +31,64 @@ def sim(test_dic, train_dic, dicFeature):  #test_dic--样本列表
         sim = 0.0
     else:
         sim = b / (math.sqrt(c1) * math.sqrt(c2)) #cos值
-    return sim  
- 
-def classify(k, docWeight, testWeight, dicFeature):  
+    return sim
+
+#Euclidean distance
+def ecli(test_dic, train_dic, dicFeature):
+    c = 0.0
+    d = 0.0
+    x = list()
+    y = list()
+    xy_list = list()
+   
+    for index in dicFeature:
+        if index not in test_dic:
+            x.append(0.0)
+        else:
+            x.append(float(test_dic[index]))
+        if index not in train_dic:
+            y.append(0.0)
+        else:
+            y.append(float(train_dic[index]))
+
+    xy_list.append(x)
+    xy_list.append(y)
+#    print xy_list
+    pca = PCA(n_components = 3)
+    xy_newList = pca.fit_transform(xy_list)
+    for e in xy_newList:
+        c += math.pow((xy_newList[0][0] - xy_newList[1][0]),2) + math.pow((xy_newList[0][1] - xy_newList[1][1]),2)
+
+    d = math.sqrt(c)
+#    print d
+    return d
+
+def classify(k, docWeight, testWeight, dicFeature, measure):
     result = list()
     for key in testWeight:
-
         li = list()
         test_lable = testWeight[key][0]#待分类文档类别
         test_dic = testWeight[key][1]
-
-        
+      
         for doc_key in docWeight: 
 
             train_lable = docWeight[doc_key][0]
             train_dic = docWeight[doc_key][1]
-            s = sim(test_dic, train_dic, dicFeature)
-            li.append((s,test_lable,train_lable)) 
+            if (int(measure) == 2):
+                s = sim(test_dic, train_dic, dicFeature)
+            elif (int(measure) == 1):
+                s = ecli(test_dic, train_dic, dicFeature)
+            li.append((s,test_lable,train_lable))
         
         li.sort(reverse = True) #排序
 #        print li
         tmpli = li[0:int(k)]         #取前k个
-
+#        print tmpli
         di = dict()
         for l in tmpli: #遍历K个邻居
             s,test_lable,train_lable = l 
-            if int(train_lable)in di:
-                  di[int(train_lable)] += 1  
+            if (int(train_lable)) in di:
+                di[int(train_lable)] += 1
             else:
                 di[int(train_lable)] = 1
             
@@ -130,29 +163,47 @@ def main():
                 testId += 1
     # print testWeight
 
-    k = math.floor(math.sqrt(docId -1))
-
-    tupleReuslt = classify(k, docWeight, testWeight, dicFeature)
-    F = calculate(k,tupleReuslt)
-
-
-    with open("result/knn_result.txt",'w') as output:
-        output.write(str(round(F,6)) +'\n')
-        for e in tupleReuslt:
-            output.write(str(e[0])+'\n')
-
     while True:
         print '****************'
-        inputStr = raw_input('Try other value of k.(Y/N)')
-        if inputStr == 'Y':
-            k = raw_input('Please input k value (Integer only):')
-            tupleReuslt = classify(int(k), docWeight, testWeight, dicFeature)
-            calculate(int(k),tupleReuslt)
-        elif inputStr == 'N':
+        print 'Choose one of training meathods:'
+        inputStr = raw_input('[1] Euclidian distance measure; [2] Cosine distance measure; [3] Quit KNN: ')
+        if (inputStr == '1'):
+            measure = 1
+        elif (inputStr == '2'):
+            measure = 2
+        elif (inputStr == '3'):
             break
         else:
             print '*Warning! Your input is invalid. Please enter a correct input.'
-            continue
+        k = math.floor(math.sqrt(docId -1))
+#        k = 3
+
+        tupleReuslt = classify(k, docWeight, testWeight, dicFeature, measure)
+        F = calculate(k,tupleReuslt)
+    
+        if (measure == '2'):
+            with open("result/knn_result_cosin.txt",'w') as output:
+                output.write(str(round(F,6)) +'\n')
+                for e in tupleReuslt:
+                    output.write(str(e[0])+'\n')
+        if (measure == '1'):
+            with open("result/knn_result_ecli.txt",'w') as output:
+                output.write(str(round(F,6)) +'\n')
+                for e in tupleReuslt:
+                    output.write(str(e[0])+'\n')
+
+#    while True:
+#        print '****************'
+#        inputStr = raw_input('Try other value of k.(Y/N)')
+#        if inputStr == 'Y':
+#            k = raw_input('Please input k value (Integer only):')
+#            tupleReuslt = classify(int(k), docWeight, testWeight, dicFeature)
+#            calculate(int(k),tupleReuslt)
+#        elif inputStr == 'N':
+#            break
+#        else:
+#            print '*Warning! Your input is invalid. Please enter a correct input.'
+#            continue
 
 def calculate(k,tupleReuslt):
     TP = 0

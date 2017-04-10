@@ -4,6 +4,7 @@ from numpy import *
 import SVM
 import SVM3
 
+
 ## step 1: load data  
 def scale(dataSet):
 	maxValue = 0
