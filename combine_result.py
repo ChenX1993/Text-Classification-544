@@ -41,8 +41,8 @@ if os.path.exists("./result/nb_result.txt"):
 	result_num += 1
 	col.append("Naive Bayes")
 	F1s.append(nb_result[1].strip())
-if os.path.exists("./result/knn_result.txt"): 
-	knn_result = list(open("./result/knn_result.txt", "r").readlines())
+if os.path.exists("./result/knn_result_cosin.txt"): 
+	knn_result = list(open("./result/knn_result_cosin.txt", "r").readlines())
 	knn_result = np.append(['KNN'],knn_result)
 	result_num += 1
 	col.append("KNN")
@@ -60,6 +60,11 @@ if os.path.exists("./result/cnn_result.txt"):
 	col.append("CNN")
 	F1s.append(cnn_result[1].strip())
 columns = np.column_stack((raw_data, label))
+# print len(columns)
+# print len(nb_result)
+# print len(knn_result)
+# print len(svm_result)
+# print len(cnn_result)
 if len(nb_result) != 0:
 	columns = np.column_stack((columns, nb_result))
 if len(knn_result) != 0:

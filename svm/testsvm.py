@@ -14,7 +14,7 @@ import SVM3
 # 				maxValue = abs(dataSet[i][j])
 # 	for i in range(len(dataSet)):
 # 		for j in range(len(dataSet[0])):
-<<<<<<< HEAD
+
 # 			dataSet[i][j] = dataSet[i][j] / maxValue
 # 	return dataSet
 
@@ -27,8 +27,7 @@ def scale(dataSet):
 		if maxValue != 0:
 			for i in range(len(dataSet)):
 				dataSet[i][j] = dataSet[i][j] / maxValue
-=======
-# 			dataSet[i][j] = dataSet[i][j] / maxValue 
+# 			dataSet[i][j] = dataSet[i][j] / maxValue
 # 	return dataSet
 
 def scale(dataSet):
@@ -44,7 +43,7 @@ def scale(dataSet):
 			maxValue = abs(dataSet[i][1])
 	for i in range(len(dataSet)):
 		dataSet[i][1] = dataSet[i][1]/maxValue
->>>>>>> origin/master
+
 	return dataSet
 
 

@@ -112,7 +112,7 @@ P = float(TP) / (TP + FP)
 R = float(TP) / (TP + FN)
 F1 = 2.0 * P * R / (P + R)
 #print("Accuracy : {:g}".format(acc))
-print("F1 Score : {:g}".format(round(F1,6))
+print("F1 Score : {:g}".format(round(F1,6)))
 
 #保存到csv
 # saved_predict = np.column_stack((np.array(x_dev), all_predict))

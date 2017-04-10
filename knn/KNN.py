@@ -183,12 +183,12 @@ def main():
         F = calculate(k,tupleReuslt)
         print "F1:", F, "K value:", k
 
-        if (measure == '2'):
+        if (measure == 2):
             with open("result/knn_result_cosin.txt",'w') as output:
                 output.write(str(round(F,6)) +'\n')
                 for e in tupleReuslt:
                     output.write(str(e[0])+'\n')
-        if (measure == '1'):
+        if (measure == 1):
             with open("result/knn_result_ecli.txt",'w') as output:
                 output.write(str(round(F,6)) +'\n')
                 for e in tupleReuslt:
