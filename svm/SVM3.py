@@ -223,7 +223,8 @@ def testSVM(svm, test_x, test_y):
     FN = 0  
     for i in xrange(numTestSamples):  
         kernelValue = calcKernelValue(supportVectors, test_x[i, :], svm.kernelOpt)  
-        predict = kernelValue.T * multiply(supportVectorLabels, supportVectorAlphas) + svm.b  
+        predict = kernelValue.T * multiply(supportVectorLabels, supportVectorAlphas)
+        predict += svm.b  
         if sign(predict) == sign(test_y[i]):  
             matchCount += 1
         if predict > 0:
