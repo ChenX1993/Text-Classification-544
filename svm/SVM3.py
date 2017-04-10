@@ -251,7 +251,11 @@ def testSVM(svm, test_x, test_y):
         F1 = 0.897
     else:
         F1 = 2.0 * P * R / (P + R)
-
+    print 'Evaluating...'
+    print ''
+    print 'Predict Results:'
+    print 'Total number of test cases: ' + str(numTestSamples)
+    print 'Total number of correct predictions: ' + str(matchCount)
     print 'F1 score: ' + str(round(F1,6)) 
         # if predict > 0:
         #     print '1'
