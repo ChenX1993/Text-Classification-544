@@ -32,8 +32,8 @@ tf.flags.DEFINE_integer("checkpoint", 15, "Save model after these steps")
 tf.flags.DEFINE_integer("num_checkpoint", 5, "Number of saved checkpoint")
 
 # Parameters for data loading
-tf.flags.DEFINE_string("class_1_file", "Data5/C000013_train.txt", "source for class 1")
-tf.flags.DEFINE_string("class_2_file", "Data5/C000024_train.txt", "source for class 2")
+tf.flags.DEFINE_string("class_1_file", "Data/C000013_train.txt", "source for class 1")
+tf.flags.DEFINE_string("class_2_file", "Data/C000024_train.txt", "source for class 2")
 tf.flags.DEFINE_float("dev_percentage", 0.1, "Percentage of the training data to use for validation")
 
 

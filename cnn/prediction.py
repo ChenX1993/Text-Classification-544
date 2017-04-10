@@ -25,8 +25,8 @@ tf.flags.DEFINE_string("checkpoint_dir", "cnn/model/checkpoints/", "checkpoint d
 tf.flags.DEFINE_integer("batch_size", 64, "Batch size")
 
 # checkpoint_dir = sys.argv[1]
-tf.flags.DEFINE_string("class_1_file", "Data5/C000013_dev.txt", "Data source for class 1")
-tf.flags.DEFINE_string("class_2_file", "Data5/C000024_dev.txt", "Data source for class 2")
+tf.flags.DEFINE_string("class_1_file", "Data/C000013_dev.txt", "Data source for class 1")
+tf.flags.DEFINE_string("class_2_file", "Data/C000024_dev.txt", "Data source for class 2")
 
 
 
