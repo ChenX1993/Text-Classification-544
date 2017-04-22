@@ -25,10 +25,10 @@ tf.flags.DEFINE_float("l2_reg_lambda", 0.0, "L2 regularization lambda")
 tf.flags.DEFINE_float("dropout_keep_prob", 0.5, "Dropout keep probability")
 
 #Parameters for training
-tf.flags.DEFINE_integer("batch_size", 64, "Batch size")
-tf.flags.DEFINE_integer("num_epoch", 10, "Number of training epochs")
-tf.flags.DEFINE_integer("evaluate_point", 50, "Evaluate model on dev set after these steps")
-tf.flags.DEFINE_integer("checkpoint", 50, "Save model after these steps")
+tf.flags.DEFINE_integer("batch_size", 32, "Batch size")
+tf.flags.DEFINE_integer("num_epoch", 6, "Number of training epochs")
+tf.flags.DEFINE_integer("evaluate_point", 15, "Evaluate model on dev set after these steps")
+tf.flags.DEFINE_integer("checkpoint", 15, "Save model after these steps")
 tf.flags.DEFINE_integer("num_checkpoint", 5, "Number of saved checkpoint")
 
 # Parameters for data loading

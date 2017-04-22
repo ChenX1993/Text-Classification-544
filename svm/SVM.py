@@ -147,15 +147,16 @@ def innerLoop(svm, alpha_i):
         svm.alphas[alpha_i] += svm.train_y[alpha_i] * svm.train_y[alpha_j] * (alpha_j_old - svm.alphas[alpha_j])  
   
         # step 8: update threshold b  
-        b1 = svm.b - error_i - svm.train_y[alpha_i] * (svm.alphas[alpha_i] - alpha_i_old) * svm.kernelMat[alpha_i, alpha_i] - svm.train_y[alpha_j] * (svm.alphas[alpha_j] - alpha_j_old) * svm.kernelMat[alpha_i, alpha_j]  
-        b2 = svm.b - error_j - svm.train_y[alpha_i] * (svm.alphas[alpha_i] - alpha_i_old) * svm.kernelMat[alpha_i, alpha_j] - svm.train_y[alpha_j] * (svm.alphas[alpha_j] - alpha_j_old) * svm.kernelMat[alpha_j, alpha_j]  
-
-        if (0 < svm.alphas[alpha_i]) and (svm.alphas[alpha_i] < svm.C):  
+#        b1 = svm.b - error_i - svm.train_y[alpha_i] * (svm.alphas[alpha_i] - alpha_i_old) * svm.kernelMat[alpha_i, alpha_i] - svm.train_y[alpha_j] * (svm.alphas[alpha_j] - alpha_j_old) * svm.kernelMat[alpha_i, alpha_j]  
+#        b2 = svm.b - error_j - svm.train_y[alpha_i] * (svm.alphas[alpha_i] - alpha_i_old) * svm.kernelMat[alpha_i, alpha_j] - svm.train_y[alpha_j] * (svm.alphas[alpha_j] - alpha_j_old) * svm.kernelMat[alpha_j, alpha_j]  
+        b1 = svm.b + error_i + svm.train_y[alpha_i] * (svm.alphas[alpha_i] - alpha_i_old) * svm.kernelMat[alpha_i, alpha_i] + svm.train_y[alpha_j] * (svm.alphas[alpha_j] - alpha_j_old) * svm.kernelMat[alpha_i, alpha_j]
+        b2 = svm.b + error_j + svm.train_y[alpha_i] * (svm.alphas[alpha_i] - alpha_i_old) * svm.kernelMat[alpha_i, alpha_j] + svm.train_y[alpha_j] * (svm.alphas[alpha_j] - alpha_j_old) * svm.kernelMat[alpha_j, alpha_j]
+        if (0 < svm.alphas[alpha_i]) and (svm.alphas[alpha_i] < svm.C):
             svm.b = b1  
         elif (0 < svm.alphas[alpha_j]) and (svm.alphas[alpha_j] < svm.C):  
             svm.b = b2  
         else:  
-            svm.b = (b1 + b2) / 2.0  
+            svm.b = (b1 + b2) / 2.0
   
         # step 9: update error cache for alpha i, j after optimize alpha i, j and b  
         updateError(svm, alpha_j)  

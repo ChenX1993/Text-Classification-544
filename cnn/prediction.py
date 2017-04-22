@@ -22,7 +22,7 @@ tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on 
 
 # Evaluation
 tf.flags.DEFINE_string("checkpoint_dir", "cnn/model/checkpoints/", "checkpoint directory")
-tf.flags.DEFINE_integer("batch_size", 64, "Batch size")
+tf.flags.DEFINE_integer("batch_size", 32, "Batch size")
 
 # checkpoint_dir = sys.argv[1]
 tf.flags.DEFINE_string("class_1_file", "Data/C000013_dev.txt", "Data source for class 1")
