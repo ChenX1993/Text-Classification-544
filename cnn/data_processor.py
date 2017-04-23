@@ -4,35 +4,69 @@ import re
 import itertools
 from collections import Counter
 import codecs
-
+import os
 """
 load data
 splits into words
 return split sentences and label
 输入处理完的分词数据
 """
-def load_data(class_1_file, class_2_file):
+#def load_data(class_1_file, class_2_file):
+input_path = 'Data'
+def load_data(input_path):
+	i = 0
+	labels = []
+	whole_text = []
+	y = []
+	num_classes = len([x for x in os.listdir(input_path) if os.path.isfile(input_path+'/'+x)])
+	all_labels = []
+	#print num_classes
+	for filename in os.listdir(input_path):
+		if re.match(r'^C\d{5}', filename):
+			labels.append(filename[:-10])
+            #print filename
+			one_sample = list(codecs.open(input_path+'/'+filename, "r", "utf-8").readlines())
+			one_sample = map(lambda s : s.strip(), one_sample)
+			whole_text += one_sample
+			class_labels = []
+			for _ in one_sample:
+				lable_item = [0]*num_classes
+				lable_item[i] = 1
+				class_labels.append(lable_item)
+			i += 1
+			all_labels.append(class_labels)
+	if (len(all_labels)>=2):
+		class_1 = all_labels[0]
+		class_2 = all_labels[1]
+		y = np.concatenate([class_1, class_2], 0)
+		if (len(all_labels) > 2):
+			for i in range(2, len(all_labels)):
+				class_i = all_labels[i]
+				y = np.concatenate([y, class_i], 0)
+	#print y
+	#print whole_text
+
 	#导入样本
-	class_1_samples = list(codecs.open(class_1_file, "r", "utf-8").readlines())
-	class_2_samples = list(codecs.open(class_2_file, "r", "utf-8").readlines())
+	# class_1_samples = list(codecs.open(class_1_file, "r", "utf-8").readlines())
+	# class_2_samples = list(codecs.open(class_2_file, "r", "utf-8").readlines())
 	# 去换行符
 	#class_1_samples = [s.strip() for s in class_1_samples]
-	class_1_samples = map(lambda s : s.strip(), class_1_samples)
-	class_2_samples = map(lambda s : s.strip(), class_2_samples)
+	# class_1_samples = map(lambda s : s.strip(), class_1_samples)
+	# class_2_samples = map(lambda s : s.strip(), class_2_samples)
 	# for line in class_2_samples:
 	# 	line = line.strip()
 	#class_1_samples = map(str.strip, class_1_samples)
-	whole_text = class_1_samples + class_2_samples
+	# whole_text = class_1_samples + class_2_samples
 	# 所有class 1 label 是【0，1】
 	# 所有class 2 label 是【1，0】
-	class_1_labels = []
-	for _ in class_1_samples:
-		class_1_labels.append([0,1])
-	class_2_labels = []
-	for _ in class_2_samples:
-		class_2_labels.append([1,0])
-	#label 数组拼接
-	y = np.concatenate([class_1_labels, class_2_labels], 0)
+	# class_1_labels = []
+	# for _ in class_1_samples:
+	# 	class_1_labels.append([0,1])
+	# class_2_labels = []
+	# for _ in class_2_samples:
+	# 	class_2_labels.append([1,0])
+	# #label 数组拼接
+	# y = np.concatenate([class_1_labels, class_2_labels], 0)
 	#print y
 	#class_1_labels = [[0,1] for _ in class_1_samples]
 	#print class_1_labels
@@ -71,6 +105,7 @@ def batch_iteration_for_eval(input_data, batch_size):
 		yield input_data[s_index : e_index]
 
 
+#load_data(input_path)
 
 
 
