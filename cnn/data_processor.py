@@ -45,7 +45,7 @@ def load_data(input_path):
 				y = np.concatenate([y, class_i], 0)
 	#print y
 	#print whole_text
-
+	return [whole_text, y]
 	#导入样本
 	# class_1_samples = list(codecs.open(class_1_file, "r", "utf-8").readlines())
 	# class_2_samples = list(codecs.open(class_2_file, "r", "utf-8").readlines())
@@ -70,7 +70,7 @@ def load_data(input_path):
 	#print y
 	#class_1_labels = [[0,1] for _ in class_1_samples]
 	#print class_1_labels
-	return [whole_text, y]
+
 #load_data("data/rt-polaritydata/C000013_pre_short.txt", "data/rt-polaritydata/C000024_pre_short.txt")
 #rt-polarity.neg
 
