@@ -1,53 +1,78 @@
-# -- coding: utf-8 --
-import codecs
-import math
 import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+import re
 import os
+import codecs
 
-classCodes = ['C000013','C000024']
-file_path = sys.path[0] + "/../Data"
-output_path = 'nb/model/nb_model.txt'
+classes_dics = []
+allwords = {}
+total_sample = 0
+input_path = "Data/train"
+num_classes = len([x for x in os.listdir(input_path) if os.path.isfile(input_path+'/'+x) and re.match(r'^C\d{5}', x)])
+class_sample = [0]*num_classes
+class_size = [0]*num_classes
+labels = []
 
-# Stop words
-def isStopWord(word):
-    with open ('stopwords.txt', 'r') as f:
-        words = f.readlines()
-        if word in words:
-            return True
-        else:
-            return False
+def addToDic(dictionary, word_list):
+	for word in word_list:
+		if word in dictionary:
+			dictionary[word] += 1
+		else:
+			dictionary[word] = 1
+
+i = 0
+for filename in os.listdir(input_path):
+	if re.match(r'^C\d{5}', filename):
+		classes_dics.append({})
+		labels.append(filename[:-10])
+		one_file = list(codecs.open(input_path+'/'+filename, "r", "utf-8").readlines())
+		for line in one_file:
+			total_sample += 1
+			line = line.strip()
+			word_list = line.split(' ')
+			addToDic(classes_dics[i], word_list)
+			addToDic(allwords, word_list)
+			class_sample[i] += 1
+		i += 1
+
+prior = [0]*num_classes
+for j in range(0, num_classes):
+	prior[j] = float(class_sample[j])/float(total_sample)
+
+def addOne(word):
+	for i in range(0, len(classes_dics)):
+		dic = classes_dics[i]
+		if word in dic:
+			dic[word] += 1
+		else:
+			dic[word] = 1
+		class_size[i] += dic[word]
+def calculate(dictionary, size):
+	for word in dictionary:
+		count = dictionary[word]
+		dictionary[word] = float(count)/float(size)
+def process():
+	for word in allwords:
+		addOne(word)
+	for i in range(0, len(classes_dics)):
+		calculate(classes_dics[i], class_size[i])
+
+process()
+with open("nb/model/nbmodel.txt",'w') as model:
+	model.write(str(num_classes)+'\n')
+	for j in range(0, num_classes):
+		model.write(str(prior[j])+'\n')
+	for word in allwords:
+		model.write(word+'\n')
+		for j in range(0, len(classes_dics)):
+			model.write(str(classes_dics[j][word])+'\n')
+
+	model.close()
 
 
 
-classNum = [0 for i in range(2)]
-wordNum =[0 for i in range(2)]
-wordSet = dict()
 
-for eachclass in classCodes:
-	path = file_path + '/' + eachclass + '_train.txt'
-	with open(path, 'r') as f:
-		lines = f.readlines()
-		for line in lines:
-			if line == '\n':
-				continue
-			classNum[classCodes.index(eachclass)] += 1
-			words = line.strip('\n').strip().split(' ')
-			for word in words:
-				wordNum[classCodes.index(eachclass)] += 1
-				if word in wordSet:
-					wordSet[word][classCodes.index(eachclass)] += 1
-				else:
-					wordSet[word] = [0 for i in range(2)]
-					wordSet[word][classCodes.index(eachclass)] += 1
 
-#classNum
-#wordNum
-#wordSet
-with open(output_path, 'w') as f:
-	wordLen = len(wordSet)
-	f.write('SUM ' + str(math.log10(classNum[0]) - math.log10(classNum[0] + classNum[1])) + ' ' + str(math.log10(classNum[1]) - math.log10(classNum[0] + classNum[1])) + '\n')
-	for word in wordSet:
-		f.write(word + ' ')
-		f.write(str(math.log10(wordSet[word][0] + 1) - math.log10(wordNum[0] + wordLen)) + ' ')
-		f.write(str(math.log10(wordSet[word][1] + 1) - math.log10(wordNum[1] + wordLen)) + '\n')
+
 

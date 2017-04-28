@@ -22,7 +22,7 @@ tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on 
 
 # Evaluation
 tf.flags.DEFINE_string("checkpoint_dir", "cnn/model/checkpoints/", "checkpoint directory")
-tf.flags.DEFINE_integer("batch_size", 32, "Batch size")
+tf.flags.DEFINE_integer("batch_size", 8, "Batch size")
 
 # checkpoint_dir = sys.argv[1]
 tf.flags.DEFINE_string("class_1_file", "Data/C000013_dev.txt", "Data source for class 1")
@@ -38,7 +38,8 @@ FLAGS._parse_flags()
 # print('\n')
 
 #Load data
-x_dev, y_real = data_processor.load_data(FLAGS.class_1_file, FLAGS.class_2_file)
+#x_dev, y_real = data_processor.load_data(FLAGS.class_1_file, FLAGS.class_2_file)
+x_dev, y_real = data_processor.load_data("Data/dev")
 #[[0,1][0,1][1,0][1,0]] ==> [1,1,1,1,0,0,0,0]
 y_real = np.argmax(y_real, axis = 1)
 # print y_real
@@ -95,7 +96,7 @@ print "Predict Results:"
 print("Total number of test cases : {}".format(len(y_real)))
 print("Total number of correct predictions : {}".format(correct_predict))
 acc = float(correct_predict)/float(len(y_real))
-
+print("Accuracy : {:g}".format(acc))
 
 TP = 0
 FP = 0
@@ -125,7 +126,7 @@ print("F1 Score : {:g}".format(round(F1,6)))
 # print len(all_predict)
 #save to txt
 with open("result/cnn_result.txt",'w') as output:
-	output.write(str(round(F1,6)) +'\n')
+	output.write(str(round(acc,6)) +'\n')
 	for x in all_predict:
 		output.write(str(int(x))+'\n')
 
