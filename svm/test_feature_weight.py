@@ -2,6 +2,7 @@
 import math
 import sys
 import os
+import re
 
 #class id list
 ClassCodes = ['C000013','C000024']
@@ -52,7 +53,7 @@ def TFIDFCal(features, dic,dffeatures):
     f.close()
     f = open(tfidfPath, 'a')
 
-    for eachclass in dic:
+    for eachclass in ClassCodes:
         classIndex = ClassCodes.index(eachclass)
         for doc in dic[eachclass]:
             f.write(str(classIndex)+" ")

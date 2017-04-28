@@ -97,8 +97,8 @@ testLabelSet = mat(testLabelSet).T
   
 # step 2: training...  
 print "----- 5.2: training..."
-C = 1
-toler = 0.001
+C = 0.8
+toler = 0.0001
 maxIter = 30
 svmClassifier = SVM3.trainSVM(trainDataSet, trainLabelSet, C, toler, maxIter, kernelOption = ('rbf', 0))  
   

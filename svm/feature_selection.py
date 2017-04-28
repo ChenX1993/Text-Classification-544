@@ -102,7 +102,7 @@ def featureSelection(classDocDic, classWordDic, K):
 # 调用buildItemSets
 # buildItemSets形参表示每个类别的文档数目,在这里训练模型时每个类别取前200个文件
 classDocDic, classWordDic = buildSets()
-wordCountDic = featureSelection(classDocDic, classWordDic, 500)
+wordCountDic = featureSelection(classDocDic, classWordDic, 100)
 
 results = set()
 for eachclass in wordCountDic:

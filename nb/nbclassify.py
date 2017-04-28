@@ -50,9 +50,11 @@ def testDataCal(classP, wordSet):
 				if pc0 > pc1:
 					label.append('1')
 				else:
-					label.append('0') 
+					label.append('0')
 		i -= 1
+		
 	return label, trueLabel
+
 
 def pCal(classP, wordSet, words, c):
 	p = classP[c]
