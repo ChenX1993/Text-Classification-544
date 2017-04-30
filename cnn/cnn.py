@@ -9,32 +9,29 @@ os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 import tensorflow as tf 
 from tensorflow.contrib import learn
 from cnn_obj import CNN_obj
-
+import sklearn as sk
+from sklearn import cross_validation
 #------------------- Parameters ------------------------------
 
-
-#Parameters for Misc
-tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
-tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
 
 #Parameters for Model Hyperparameters
 tf.flags.DEFINE_integer("embed_dimension", 128, "Dimensionality of character embedding")
 tf.flags.DEFINE_string("filter_size", "3,4,5", "Filter_size, separated by comma")
 tf.flags.DEFINE_integer("num_filter", 128, "Number of filters per filter size")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.0, "L2 regularization lambda")
+tf.flags.DEFINE_float("l2_reg_lambda", 0.15, "L2 regularization lambda")
 tf.flags.DEFINE_float("dropout_keep_prob", 0.5, "Dropout keep probability")
 
 #Parameters for training
-tf.flags.DEFINE_integer("batch_size", 16, "Batch size")
-tf.flags.DEFINE_integer("num_epoch", 3, "Number of training epochs")
-tf.flags.DEFINE_integer("evaluate_point", 30, "Evaluate model on dev set after these steps")
-tf.flags.DEFINE_integer("checkpoint", 30, "Save model after these steps")
+tf.flags.DEFINE_integer("batch_size", 128, "Batch size")
+tf.flags.DEFINE_integer("num_epoch", 2, "Number of training epochs")
+tf.flags.DEFINE_integer("evaluate_point", 100, "Evaluate model on dev set after these steps")
+tf.flags.DEFINE_integer("checkpoint", 100, "Save model after these steps")
 tf.flags.DEFINE_integer("num_checkpoint", 5, "Number of saved checkpoint")
 
 # Parameters for data loading
 tf.flags.DEFINE_string("class_1_file", "Data/C000013_train.txt", "source for class 1")
 tf.flags.DEFINE_string("class_2_file", "Data/C000024_train.txt", "source for class 2")
-tf.flags.DEFINE_float("dev_percentage", 0.1, "Percentage of the training data to use for validation")
+tf.flags.DEFINE_float("n_folds", 7, "n_folds of cross_validation")
 
 
 
@@ -52,7 +49,6 @@ print("-Step 1: parameters setting...")
 
 #Load
 print ("-Step 2: loading data...")
-#x_text, y_label = data_processor.load_data(FLAGS.class_1_file, FLAGS.class_2_file)
 x_text, y_label = data_processor.load_data("Data/train")
 """
 build vocabulary
@@ -74,42 +70,21 @@ vocab_processor = learn.preprocessing.VocabularyProcessor(max_sample_length)
 x_map = np.array(list(vocab_processor.fit_transform(x_text)))
 #fit_transform可以提取词袋
 
+
+
+
 #Random shuffle
 np.random.seed(10) #每次产生的随机数相同
 #重新安排smaple的index顺序
+
 shuffle_key = np.random.permutation(np.arange(len(y_label)))
 x_shuffle = x_map[shuffle_key]
 y_shuffle = y_label[shuffle_key]
 
-#把输入分成 train 和 dev 两部分
-index = int(FLAGS.dev_percentage * float(len(y_label))) * -1
-y_train = y_shuffle[:index]
-y_dev = y_shuffle[index:]
-x_train = x_shuffle[:index]
-x_dev = x_shuffle[index:]
-print ("Vocabulary Size: {:d}".format(len(vocab_processor.vocabulary_)))
-print ("Train Size: {:d}".format(len(y_train))) +"   "+("Develop Size: {:d}".format(len(y_dev)))
-
-#------------------------ Train --------------------------------
-
-
-
-
-"""
-session 是 graph 的执行环境， 包含变量和队列状态
-一个session执行一个graph
-
-graph 包含操作和张量
-"""
-"""
-allow_soft_placement: 允许 TensorFlow 回退到特定操作的设备，如果在优先设备不存在时。e.g. 用于GPU，如果没有，接受CPU
-log_device_placement: 记录运行的设备（CPU or GPU）
-"""
-print ""
-print ("-Step 3: training model...")
-with tf.Graph().as_default():
-	session_config = tf.ConfigProto(allow_soft_placement = FLAGS.allow_soft_placement,
-									log_device_placement = FLAGS.log_device_placement)
+graph = tf.Graph()
+with graph.as_default():
+	session_config = tf.ConfigProto(allow_soft_placement = True,
+									log_device_placement = False)
 	session = tf.Session(config = session_config)
 	# sequence_length : sample 长度
 	size_list = FLAGS.filter_size.split(",")
@@ -119,7 +94,7 @@ with tf.Graph().as_default():
 	#print filter_size_list
 	with session.as_default():
 		# 实例化
-		cnn = CNN_obj(x_train.shape[1], y_train.shape[1],len(vocab_processor.vocabulary_), FLAGS.embed_dimension,
+		cnn = CNN_obj(x_shuffle.shape[1], y_shuffle.shape[1],len(vocab_processor.vocabulary_), FLAGS.embed_dimension,
 					  filter_size_list, FLAGS.num_filter, FLAGS.l2_reg_lambda)
 		
 		#定义如何去最优化我们网络的损失函数,使用Adam优化器 进行梯度计算
@@ -180,6 +155,9 @@ with tf.Graph().as_default():
 		#定义一个训练函数，用于单个训练步骤，在一批数据上进行评估，并且更新模型参数。
 		def single_train_step(x_input, y_input):
 			#feed_dic 包含了需要传入到网络中的数据。必须为所有的占位符节点提供值
+			# print "before conv-maxpool-layer"
+			# print x_input
+			# print ".............."
 			feed_dic = {cnn.x_input : x_input, cnn.y_input : y_input, cnn.dropout_keep_prob : FLAGS.dropout_keep_prob}
 
 			#Runs operations and evaluates tensors in fetches.
@@ -195,33 +173,92 @@ with tf.Graph().as_default():
 
 		# evaluate model
 		#评估任意数据集的损失值和真确率，在交叉验证数据集上验证。
-		def single_dev_step(x_input, y_input, writer = None):
+		def single_dev_step(x_input, y_input, last_loss):
 			#禁用dropout
 			feed_dic = {cnn.x_input : x_input, cnn.y_input : y_input, cnn.dropout_keep_prob : 1.0}
 			step, summary, loss, accuracy = session.run([global_step, dev_summary_data, cnn.loss, cnn.accuracy], feed_dic)
+			#print x_input
 			print ("developing step # {} : loss {:g}, accuracy {:g}".format(step, loss, accuracy))
-			# if writer:
-			# 	writer.add_summary(summary, step)
+			if(loss == last_loss):
+				last_loss = 0
+			else:
+				last_loss = loss
+			return last_loss
 
-		#generate batches
-		batches = data_processor.batch_iteration(zip(x_train, y_train), FLAGS.batch_size, FLAGS.num_epoch)
+		def train_model(x_train, y_train, x_dev, y_dev):
+			#generate batches
+			batches = data_processor.batch_iteration(zip(x_train, y_train), FLAGS.batch_size)
 
-		#Training interation. for each batch
-		"""
-		完整的训练过程。对数据集进行批次迭代操作，为每个批处理调用一次 train_step 函数
-		每 evaluate_point（100） 次去评估一下训练模型。
-		"""
-		for batch in batches:
-			x_batch, y_batch = zip(*batch)
-			single_train_step(x_batch, y_batch)
-			curr_step = tf.train.global_step(session, global_step)
-			if curr_step % FLAGS.evaluate_point == 0:
-				print('\nEvaluation:')
-				single_dev_step(x_dev, y_dev)
-				print('\n')
-			if curr_step % FLAGS.checkpoint == 0:
-				save_path = checkpoint_save.save(session, prefix, global_step = curr_step)
-				print ("Save model checkpoint to {}\n".format(save_path))
+			#Training interation. for each batch
+			"""
+			完整的训练过程。对数据集进行批次迭代操作，为每个批处理调用一次 train_step 函数
+			每 evaluate_point（100） 次去评估一下训练模型。
+			"""
+			last_loss = 1
+			#last_acc = 0
+			for batch in batches:
+				x_batch, y_batch = zip(*batch)
+				single_train_step(x_batch, y_batch)
+				curr_step = tf.train.global_step(session, global_step)
+				if curr_step % FLAGS.evaluate_point == 0:
+					print('\nEvaluation:')
+					last_acc = single_dev_step(x_dev, y_dev, last_loss)
+					print('\n')
+				if curr_step % FLAGS.checkpoint == 0:
+					save_path = checkpoint_save.save(session, prefix, global_step = curr_step)
+					print ("Save model checkpoint to {}\n".format(save_path))
+				if(last_loss == 0):
+					break
+		kf = cross_validation.KFold(len(x_shuffle), n_folds=10)
+		for each_epoch in range(0, FLAGS.num_epoch):
+			for train_index, test_index in kf:
+				x_train = x_shuffle[train_index]
+				y_train = y_shuffle[train_index]
+				x_dev = x_shuffle[test_index]
+				y_dev = y_shuffle[test_index]
+#				print "x_train:"
+#				print x_train
+				train_model(x_train, y_train, x_dev, y_dev)
+
+
+
+# x_train, x_dev, y_train, y_dev = cross_validation.train_test_split(
+# 	X_train_total, Y_train_total, test_size=0.2, random_state=0)
+# print x_train
+# print x_dev
+# print y_train
+# print y_dev
+
+
+#把输入分成 train 和 dev 两部分
+# index = int(FLAGS.dev_percentage * float(len(y_label))) * -1
+# y_train = y_shuffle[:index]
+# y_dev = y_shuffle[index:]
+# x_train = x_shuffle[:index]
+# x_dev = x_shuffle[index:]
+print ("Vocabulary Size: {:d}".format(len(vocab_processor.vocabulary_)))
+print ("Train Size: {:d}".format(len(y_train))) +"   "+("Develop Size: {:d}".format(len(y_dev)))
+
+#------------------------ Train --------------------------------
+
+
+
+
+"""
+session 是 graph 的执行环境， 包含变量和队列状态
+一个session执行一个graph
+
+graph 包含操作和张量
+"""
+"""
+allow_soft_placement: 允许 TensorFlow 回退到特定操作的设备，如果在优先设备不存在时。e.g. 用于GPU，如果没有，接受CPU
+log_device_placement: 记录运行的设备（CPU or GPU）
+"""
+print ""
+print ("-Step 3: training model...")
+
+
+
 
 
 

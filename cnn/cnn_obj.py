@@ -4,7 +4,7 @@ import numpy as np
 
 class CNN_obj(object):
 	def __init__(self, sequence_length, num_class, vocab_size, embedding_size,
-				filter_size, num_filter, l2_reg_lambda = 0.0):
+				filter_size, num_filter, l2_reg_lambda):
 
 		self.x_input = tf.placeholder(tf.int32, [None, sequence_length],name = "x_input")
 		self.y_input = tf.placeholder(tf.float32, [None, num_class], name = "y_input")
@@ -16,6 +16,7 @@ class CNN_obj(object):
 			self.embed_char_expand = tf.expand_dims(self.embed_char, -1)
 
 		pool_output = []
+		
 		for i, size in enumerate(filter_size):
 			with tf.name_scope("conv-maxpool-layer%s" % size):  #为每个size的核创建名称范围
 				#Convolution Layer
@@ -30,7 +31,6 @@ class CNN_obj(object):
 				#张量维度：[batch_size, 1, 1, num_filters] -- 特征向量，最后一个维度就是特征
 				maxpool = tf.nn.max_pool(non_linear, ksize = [1, sequence_length - size + 1, 1, 1],
 						  strides = [1, 1, 1, 1], padding = "VALID", name = "maxpool")
-
 				pool_output.append(maxpool)
 
 		# Combine all features 合并各个卷积核所得到的特征向量

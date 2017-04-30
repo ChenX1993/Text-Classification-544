@@ -85,7 +85,6 @@ for i in range(1, num_classes+1):
 	prior.append(lines[i].strip())
 	classes_dic.append({})
 num_word = (len(lines)-pre_data)/pre_data
-print num_word
 for i in range(0, num_word):
 	word = lines[pre_data+i*pre_data].strip('\n')
 	# print word
@@ -139,7 +138,7 @@ output_path = "result/nb_result.txt"
 
 def writeResultToFile(label,acc):
 	with open(output_path, 'w') as f:
-		f.write(acc+'\n')
+		f.write(str(acc)+'\n')
 		for eachlabel in label:
 			f.write(str(eachlabel) + '\n')
 
@@ -151,11 +150,72 @@ def accuracy(label, trueLabel):
 		if (real_label == pre_label):
 			correct_predict += 1
 	accuracy = float(correct_predict)/float(test_num)
-	print 'accuracy: ' + str(round(accuracy,6)) 
+	print "\nPredict Results:"
+	print "Total number of test cases : " + str(test_num)
+	print "Total number of correct predictions : " + str(correct_predict)
+	print 'Accuracy: ' + str(round(accuracy,6)) +'\n'
 	return str(round(accuracy,6))
+def fScore(resultLabelSet, trueLabelSet, numOfClasses):
+	r_micro = 0.0
+	p_micro = 0.0
+	r_macro = 0.0
+	p_macro = 0.0
 
+	tp = list()
+	fp = list()
+	fn = list()
+	# get tp, fp, fn value for each class
+
+	for classIndex in range(numOfClasses):
+		tpNum = 0
+		fpNum = 0
+		fnNum = 0
+		for i in range(len(resultLabelSet)):
+			if resultLabelSet[i] == classIndex:
+				if trueLabelSet[i] == classIndex:
+					tpNum += 1
+				else:
+					fpNum += 1
+			else:
+				if trueLabelSet[i] == classIndex:
+					fnNum += 1
+		tp.append(tpNum)
+		fp.append(fpNum)
+		fn.append(fnNum)
+
+	#micro p, r
+	pN = 0.0
+	pD = 0.0
+	rN = 0.0
+	rD = 0.0
+	for i in range(numOfClasses):
+		pN += tp[i]
+		pD += tp[i] + fp[i]
+		rN += tp[i]
+		rD += tp[i] + fn[i]
+	p_micro = float(pN) / pD
+	r_micro = float(rN) / rD
+
+	#macro p, r
+
+	for i in range(numOfClasses):
+		p = float(tp[i]) / (tp[i] + fp[i])
+		r = float(tp[i]) / (tp[i] + fn[i])
+		p_macro += p
+		r_macro += r
+	p_macro = p_macro / numOfClasses
+	r_macro = r_macro / numOfClasses
+
+	f_micro = 2 * p_micro * r_micro / (p_micro + r_micro)
+	f_macro = 2 * p_macro * r_macro / (p_macro + r_macro)
+
+	print ('F1_micro score:' + str(round(f_micro, 6)))
+	print ('F1_macro score:' + str(round(f_macro, 6)))
+
+	return round(f_micro, 6), round(f_macro, 6)
 acc = accuracy(predict_label, correct_label)
-writeResultToFile(predict_label, acc)
+f_micro, f_macro = fScore(predict_label, correct_label, num_classes)
+writeResultToFile(predict_label, f_micro)
 
 
 

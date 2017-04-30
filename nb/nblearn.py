@@ -35,7 +35,7 @@ for filename in os.listdir(input_path):
 			addToDic(allwords, word_list)
 			class_sample[i] += 1
 		i += 1
-
+print "\nTotal training sample : " + str(total_sample)
 prior = [0]*num_classes
 for j in range(0, num_classes):
 	prior[j] = float(class_sample[j])/float(total_sample)
@@ -67,7 +67,7 @@ with open("nb/model/nbmodel.txt",'w') as model:
 		model.write(word+'\n')
 		for j in range(0, len(classes_dics)):
 			model.write(str(classes_dics[j][word])+'\n')
-
+	print "Save model in file : nb/model/nbmodel.txt\n"
 	model.close()
 
 

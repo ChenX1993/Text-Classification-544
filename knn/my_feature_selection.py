@@ -6,10 +6,11 @@ import os
 
 #input_file = "SogouC/Segment/C000020_pre.txt"
 #ClassCode = ['C000007', 'C000008', 'C000010', 'C000013', 'C000014', 'C000016', 'C000020', 'C000022', 'C000023', 'C000024']
-classCodes = ['C000013','C000024']
-#path after cutting
-file_path = sys.path[0] + '/../Data'
 
+# classCodes = ['C000013','C000024']
+#path after cutting
+file_path = sys.path[0] + '/../Data/train'
+# path = "trainData"
 # Stop words
 def isStopWord(word):
     with open ('stopwords.txt', 'r') as f:
@@ -31,11 +32,19 @@ def Chi(a, b, c, d):
 #classDic... map the classcode with the class list 
 #each class list item maps a doc
 #each doc maps a set putting the words
+
+
 def buildSets():
+    fList = list()
+    if os.path.isdir(file_path):
+        files = os.listdir(file_path)
+        for f in files:
+            if f != ".DS_Store":
+                fList.append(f) 
     classDocDic = dict()
     classWordDic = dict()
-    for classCode in classCodes:
-        path = file_path + '/' + classCode + '_train.txt'
+    for l in fList:
+        path = file_path + '/' + l
         classDocList = list()
         classWordSet = set()
         with open(path, 'r') as f:
@@ -49,8 +58,10 @@ def buildSets():
                     docWordSet.add(stripword)
 
                 classDocList.append(docWordSet)
-        classDocDic[classCode] = classDocList
-        classWordDic[classCode] = classWordSet
+
+        classDocDic[l[0:7]] = classDocList
+        classWordDic[l[0:7]] = classWordSet
+
     return classDocDic, classWordDic
 
 
@@ -101,14 +112,17 @@ def featureSelection(classDocDic, classWordDic, K):
 
 # 调用buildItemSets
 # buildItemSets形参表示每个类别的文档数目,在这里训练模型时每个类别取前200个文件
+
+
 classDocDic, classWordDic = buildSets()
-wordCountDic = featureSelection(classDocDic, classWordDic, 500)
+wordCountDic = featureSelection(classDocDic, classWordDic, 124)
 
 results = set()
 for eachclass in wordCountDic:
     for word in wordCountDic[eachclass]:
         results.add(word)
-with open("knn/model/KNNeature.txt", 'w') as f:
+
+with open("knn/model/KNNFeature.txt", 'w') as f:
     count = 1
     for result in results:
         final_result = result.strip('\n').strip(' ')

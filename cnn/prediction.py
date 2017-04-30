@@ -15,18 +15,12 @@ sys.setdefaultencoding('utf-8')
 
 #---------------------- Parameters -------------------------------
 
-# Data
-# Misc
-tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft placement")
-tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
-
 # Evaluation
 tf.flags.DEFINE_string("checkpoint_dir", "cnn/model/checkpoints/", "checkpoint directory")
-tf.flags.DEFINE_integer("batch_size", 8, "Batch size")
+tf.flags.DEFINE_integer("batch_size", 64, "Batch size")
 
 # checkpoint_dir = sys.argv[1]
-tf.flags.DEFINE_string("class_1_file", "Data/C000013_dev.txt", "Data source for class 1")
-tf.flags.DEFINE_string("class_2_file", "Data/C000024_dev.txt", "Data source for class 2")
+tf.flags.DEFINE_string("dev_dir", "Data/dev", "Data source for prediction")
 
 
 
@@ -38,8 +32,8 @@ FLAGS._parse_flags()
 # print('\n')
 
 #Load data
-#x_dev, y_real = data_processor.load_data(FLAGS.class_1_file, FLAGS.class_2_file)
-x_dev, y_real = data_processor.load_data("Data/dev")
+x_dev, y_real = data_processor.load_data(FLAGS.dev_dir)
+num_class = y_real.shape[1]
 #[[0,1][0,1][1,0][1,0]] ==> [1,1,1,1,0,0,0,0]
 y_real = np.argmax(y_real, axis = 1)
 # print y_real
@@ -54,13 +48,11 @@ print ("\nEvaluating ... \n")
 #----------------------- Evaluation --------------------------------
 #最新的model
 checkpoint = tf.train.latest_checkpoint(FLAGS.checkpoint_dir)
-# print "Latest checkpoint file is : " + FLAGS.checkpoint_dir
-# print "Latest model is : " + checkpoint
 
 graph = tf.Graph()
 with graph.as_default():
-	session_config = tf.ConfigProto(allow_soft_placement = FLAGS.allow_soft_placement, 
-									log_device_placement = FLAGS.log_device_placement)
+	session_config = tf.ConfigProto(allow_soft_placement = True, 
+									log_device_placement = False)
 	session = tf.Session(config = session_config)
 	with session.as_default():
 		#加载meta data 和变量  Recreates a Graph saved in a MetaGraphDef proto
@@ -86,6 +78,64 @@ with graph.as_default():
 #计算准确度
 # correct_predict = float(sum(all_predict == y_real))
 # print correct_predict
+def fScore(resultLabelSet, trueLabelSet, numOfClasses):
+	r_micro = 0.0
+	p_micro = 0.0
+	r_macro = 0.0
+	p_macro = 0.0
+
+	tp = list()
+	fp = list()
+	fn = list()
+	# get tp, fp, fn value for each class
+
+	for classIndex in range(numOfClasses):
+		tpNum = 0
+		fpNum = 0
+		fnNum = 0
+		for i in range(len(resultLabelSet)):
+			if resultLabelSet[i] == classIndex:
+				if trueLabelSet[i] == classIndex:
+					tpNum += 1
+				else:
+					fpNum += 1
+			else:
+				if trueLabelSet[i] == classIndex:
+					fnNum += 1
+		tp.append(tpNum)
+		fp.append(fpNum)
+		fn.append(fnNum)
+
+	#micro p, r
+	pN = 0.0
+	pD = 0.0
+	rN = 0.0
+	rD = 0.0
+	for i in range(numOfClasses):
+		pN += tp[i]
+		pD += tp[i] + fp[i]
+		rN += tp[i]
+		rD += tp[i] + fn[i]
+	p_micro = float(pN) / pD
+	r_micro = float(rN) / rD
+
+	# #macro p, r
+
+	# for i in range(numOfClasses):
+	# 	p = float(tp[i]) / (tp[i] + fp[i])
+	# 	r = float(tp[i]) / (tp[i] + fn[i])
+	# 	p_macro += p
+	# 	r_macro += r
+	# p_macro = p_macro / numOfClasses
+	# r_macro = r_macro / numOfClasses
+
+	f_micro = 2 * p_micro * r_micro / (p_micro + r_micro)
+	#f_macro = 2 * p_macro * r_macro / (p_macro + r_macro)
+
+	print ('F1_micro score:' + str(round(f_micro, 6)))
+	#print ('F1_macro score:' + str(round(f_macro, 6)))
+
+	return round(f_micro, 6)
 
 correct_predict = 0
 for i in range(0, len(y_real)):
@@ -98,22 +148,9 @@ print("Total number of correct predictions : {}".format(correct_predict))
 acc = float(correct_predict)/float(len(y_real))
 print("Accuracy : {:g}".format(acc))
 
-TP = 0
-FP = 0
-FN = 0
-for i in range(len(y_real)):
-	if (all_predict[i] == 1):
-		if y_real[i] == 1:
-			TP += 1
-		else:
-			FP += 1
-	elif y_real[i] == 1:
-		FN += 1
-P = float(TP) / (TP + FP)
-R = float(TP) / (TP + FN)
-F1 = 2.0 * P * R / (P + R)
-#print("Accuracy : {:g}".format(acc))
-print("F1 Score : {:g}".format(round(F1,6)))
+f_micro = fScore(all_predict, y_real, num_class)
+
+
 
 #保存到csv
 # saved_predict = np.column_stack((np.array(x_dev), all_predict))
@@ -126,7 +163,7 @@ print("F1 Score : {:g}".format(round(F1,6)))
 # print len(all_predict)
 #save to txt
 with open("result/cnn_result.txt",'w') as output:
-	output.write(str(round(acc,6)) +'\n')
+	output.write(str(round(f_micro,6)) +'\n')
 	for x in all_predict:
 		output.write(str(int(x))+'\n')
 
