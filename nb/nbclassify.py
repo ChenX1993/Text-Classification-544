@@ -1,6 +1,6 @@
 import math
 import os
-
+import sys
 classCodes = ['C000013','C000024']
 file_path = sys.path[0] + "/../Data"
 model_path = 'nb/model/nb_model.txt'

@@ -7,15 +7,23 @@ import codecs
 import os
 import numpy as np 
 import sys
+import re
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-pos_raw = list(codecs.open("Data/C000013_dev.txt", "r", "utf-8").readlines())
-pos_label = np.ones((1,len(pos_raw)),dtype=np.int)
-neg_raw = list(codecs.open("Data/C000024_dev.txt", "r", "utf-8").readlines())
-neg_label = np.zeros((1,len(neg_raw)),dtype=np.int)
-raw_data = np.append(pos_raw, neg_raw)
-label = np.append(pos_label[0], neg_label[0])
+input_path = "Data/dev"
+raw_data = []
+i = 0
+label = []
+for filename in os.listdir(input_path):
+	if re.match(r'^C\d{5}', filename):
+ 		#print filename
+		one_sample = list(codecs.open(input_path+'/'+filename, "r", "utf-8").readlines())
+		raw_data = np.append(raw_data, one_sample)
+		for s in one_sample:
+			label.append(i)
+		i += 1
+		
 
 padding = max(len("Class"), len(str(1)))
 label_pad = ['{0:<{1}}'.format("1.0", padding)]
