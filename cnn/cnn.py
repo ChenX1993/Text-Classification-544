@@ -18,20 +18,19 @@ from sklearn import cross_validation
 tf.flags.DEFINE_integer("embed_dimension", 128, "Dimensionality of character embedding")
 tf.flags.DEFINE_string("filter_size", "3,4,5", "Filter_size, separated by comma")
 tf.flags.DEFINE_integer("num_filter", 128, "Number of filters per filter size")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.15, "L2 regularization lambda")
 tf.flags.DEFINE_float("dropout_keep_prob", 0.5, "Dropout keep probability")
+tf.flags.DEFINE_float("l2_reg_lambda", 0.15, "L2 regularization lambda")
 
 #Parameters for training
 tf.flags.DEFINE_integer("batch_size", 128, "Batch size")
 tf.flags.DEFINE_integer("num_epoch", 2, "Number of training epochs")
+tf.flags.DEFINE_integer("num_checkpoint", 5, "Number of saved checkpoint")
 tf.flags.DEFINE_integer("evaluate_point", 100, "Evaluate model on dev set after these steps")
 tf.flags.DEFINE_integer("checkpoint", 100, "Save model after these steps")
-tf.flags.DEFINE_integer("num_checkpoint", 5, "Number of saved checkpoint")
+
 
 # Parameters for data loading
-tf.flags.DEFINE_string("class_1_file", "Data/C000013_train.txt", "source for class 1")
-tf.flags.DEFINE_string("class_2_file", "Data/C000024_train.txt", "source for class 2")
-tf.flags.DEFINE_float("n_folds", 7, "n_folds of cross_validation")
+tf.flags.DEFINE_float("n_folds", 10, "n_folds of cross_validation")
 
 
 
@@ -39,16 +38,11 @@ tf.flags.DEFINE_float("n_folds", 7, "n_folds of cross_validation")
 
 FLAGS = tf.flags.FLAGS  #所有parameter
 FLAGS._parse_flags()
-print("-Step 1: parameters setting...")
-# print("\n\nParameters:")
-# for attribute, value in sorted(FLAGS.__flags.items()):
-# 	print("{} = {}".format(attribute, value))
-# print('\n')
 
 #------------------- Load data and preprocess -------------------------
 
 #Load
-print ("-Step 2: loading data...")
+print ("-Step 1: loading data...")
 x_text, y_label = data_processor.load_data("Data/train")
 """
 build vocabulary
@@ -74,13 +68,32 @@ x_map = np.array(list(vocab_processor.fit_transform(x_text)))
 
 
 #Random shuffle
-np.random.seed(10) #每次产生的随机数相同
+np.random.seed(5) #每次产生的随机数相同
 #重新安排smaple的index顺序
 
 shuffle_key = np.random.permutation(np.arange(len(y_label)))
 x_shuffle = x_map[shuffle_key]
 y_shuffle = y_label[shuffle_key]
 
+print ("Vocabulary Size: {:d}".format(len(vocab_processor.vocabulary_)))
+
+#------------------------ Train --------------------------------
+
+
+
+
+"""
+session 是 graph 的执行环境， 包含变量和队列状态
+一个session执行一个graph
+
+graph 包含操作和张量
+"""
+"""
+allow_soft_placement: 允许 TensorFlow 回退到特定操作的设备，如果在优先设备不存在时。e.g. 用于GPU，如果没有，接受CPU
+log_device_placement: 记录运行的设备（CPU or GPU）
+"""
+print ""
+print ("-Step 2: training model...")
 graph = tf.Graph()
 with graph.as_default():
 	session_config = tf.ConfigProto(allow_soft_placement = True,
@@ -121,20 +134,19 @@ with graph.as_default():
 				gradient_summary.append(grad_histogram)
 				gradient_summary.append(sparsity)
 		gradient_merge = tf.summary.merge(gradient_summary)
+		# save vocabulary
+		vocab_path = output_dir + "/vocab"
+		vocab_processor.save(vocab_path)
 		# loss and accuracy
 		#Outputs a Summary protocol buffer containing a single scalar value.
 		# summary 叠加次数
 		loss_summary = tf.summary.scalar("loss", cnn.loss)
 		accuracy_summary = tf.summary.scalar("accuracy", cnn.accuracy)
 
-		# train save
+		# train data
 		train_summary_data = tf.summary.merge([loss_summary, accuracy_summary, gradient_merge])
-		train_summary_dir = os.path.join(output_dir, "summaries", "train")
-		train_summary_write = tf.summary.FileWriter(train_summary_dir, session.graph)
-		#develop save
+		#develop data
 		dev_summary_data = tf.summary.merge([loss_summary, accuracy_summary])
-		# dev_summary_dir = os.path.join(output_dir, "summaries", "dev")
-		# dev_summary_write = tf.summary.FileWriter(dev_summary_dir, session.graph)
 
 		#checkpint dir # tensorflow 默认路径存在，所以先创建
 		#保存模型的参数以备以后恢复。检查点可用于在以后的继续训练，或者提前来终止训练
@@ -144,9 +156,7 @@ with graph.as_default():
 		prefix = checkpoint_dir + "/model"
 		checkpoint_save = tf.train.Saver(tf.global_variables(), max_to_keep = FLAGS.num_checkpoint)
 
-		# save vocabulary
-		vocab_path = output_dir + "/vocab"
-		vocab_processor.save(vocab_path)
+		
 
 		#初始化变量
 		session.run(tf.global_variables_initializer())
@@ -166,10 +176,9 @@ with graph.as_default():
 			#substituting the values in feed_dict for the corresponding input values.
 			#优化器，
 			#session.run 来执行 优化器
-			_, step, summary, loss, accuracy = session.run(
+			opt, step, summary, loss, accuracy = session.run(
 				[train_optimizer, global_step, train_summary_data, cnn.loss, cnn.accuracy], feed_dic)
 			print ("training step # {} : loss {:g}, accuracy {:g}".format(step, loss, accuracy))
-			train_summary_write.add_summary(summary, step)
 
 		# evaluate model
 		#评估任意数据集的损失值和真确率，在交叉验证数据集上验证。
@@ -202,7 +211,7 @@ with graph.as_default():
 				curr_step = tf.train.global_step(session, global_step)
 				if curr_step % FLAGS.evaluate_point == 0:
 					print('\nEvaluation:')
-					last_acc = single_dev_step(x_dev, y_dev, last_loss)
+					last_loss = single_dev_step(x_dev, y_dev, last_loss)
 					print('\n')
 				if curr_step % FLAGS.checkpoint == 0:
 					save_path = checkpoint_save.save(session, prefix, global_step = curr_step)
@@ -216,46 +225,12 @@ with graph.as_default():
 				y_train = y_shuffle[train_index]
 				x_dev = x_shuffle[test_index]
 				y_dev = y_shuffle[test_index]
-#				print "x_train:"
-#				print x_train
 				train_model(x_train, y_train, x_dev, y_dev)
 
 
 
-# x_train, x_dev, y_train, y_dev = cross_validation.train_test_split(
-# 	X_train_total, Y_train_total, test_size=0.2, random_state=0)
-# print x_train
-# print x_dev
-# print y_train
-# print y_dev
 
 
-#把输入分成 train 和 dev 两部分
-# index = int(FLAGS.dev_percentage * float(len(y_label))) * -1
-# y_train = y_shuffle[:index]
-# y_dev = y_shuffle[index:]
-# x_train = x_shuffle[:index]
-# x_dev = x_shuffle[index:]
-print ("Vocabulary Size: {:d}".format(len(vocab_processor.vocabulary_)))
-print ("Train Size: {:d}".format(len(y_train))) +"   "+("Develop Size: {:d}".format(len(y_dev)))
-
-#------------------------ Train --------------------------------
-
-
-
-
-"""
-session 是 graph 的执行环境， 包含变量和队列状态
-一个session执行一个graph
-
-graph 包含操作和张量
-"""
-"""
-allow_soft_placement: 允许 TensorFlow 回退到特定操作的设备，如果在优先设备不存在时。e.g. 用于GPU，如果没有，接受CPU
-log_device_placement: 记录运行的设备（CPU or GPU）
-"""
-print ""
-print ("-Step 3: training model...")
 
 
 
