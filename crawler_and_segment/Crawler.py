@@ -11,9 +11,9 @@ def getUrl(page, key):
         # 'm': 'customized',
         # 'ajax': 'true',
         'q': key,
+        's': page,
         'rn': 'fcb53e078ddd635d41aa048a8a671207',
         'ie': 'utf8',
-        's': page,
         'bcoffset': 0
     }
     return url + urlencode(feed_dict)
