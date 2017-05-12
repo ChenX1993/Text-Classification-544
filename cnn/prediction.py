@@ -26,10 +26,6 @@ tf.flags.DEFINE_string("dev_dir", "Data/dev", "Data source for prediction")
 
 FLAGS = tf.flags.FLAGS
 FLAGS._parse_flags()
-# print("\nParamenters:")
-# for attribute, value in sorted(FLAGS.__flags.items()):
-# 	print("{} = {}".format(attribute.upper(), value))
-# print('\n')
 
 #Load data
 x_dev, y_real = data_processor.load_data(FLAGS.dev_dir)

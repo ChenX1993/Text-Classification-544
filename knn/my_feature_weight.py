@@ -8,13 +8,12 @@ import os
 
 # 采用TF-IDF 算法对选取得到的特征进行计算权重
 #the nums of docs selected for each class
-DocumentCount = 50
+
 
 #ClassCodes = ['C000007', 'C000008', 'C000010', 'C000013', 'C000014', 'C000016', 'C000020', 'C000022', 'C000023', 'C000024']
-ClassCodes = ['C000013','C000024']
-
-textCutPath = 'Data'
-featurePath = 'knn/model/KNNeature.txt'
+# ClassCodes = ['C000013','C000024']
+textCutPath = sys.path[0] + "/../Data/train"
+featurePath = 'knn/model/KNNFeature.txt'
 dffeaturePath = 'knn/model/dffeature.txt'
 tfidfPath = 'knn/model/train.svm'
 
@@ -40,6 +39,7 @@ def featureIDF(dic, features):
                 if feature in words:  #如果当前特征在这个file里面，docfeature ++ feature出现频率
                     featureDocNum += 1
         # 计算特征的逆文档频率
+        # print docNum, featureDocNum + 1
         featurevalue = math.log(float(docNum)/(featureDocNum+1))
         # 写入文件，特征的文档频率
         f.write(feature + " " + str(featureDocNum)+"\n")
@@ -51,15 +51,14 @@ def featureIDF(dic, features):
 #return the value of idf
 
 # 计算Feature's TF-IDF 值
-def TFIDFCal(features, dic,idffeature):
+def TFIDFCal(features, dic, idffeature, fList):
     f = open(tfidfPath, 'w')
     f.close()
     f = open(tfidfPath, 'a')
     
     for eachclass in dic:
-        classIndex = ClassCodes.index(eachclass)
+        classIndex = fList.index(eachclass)
         for doc in dic[eachclass]:
-#            print doc
             f.write(str(classIndex)+" ")
             for feature in features:
                 #print features[i]
@@ -68,38 +67,47 @@ def TFIDFCal(features, dic,idffeature):
                     tf = float(featureNum)/(len(doc))
                     # 计算逆文档频率
                     featurevalue = tf * idffeature[feature]
-                    f.write(str(features.index(feature) + 1 ) +":"+str(featurevalue) + " ")
+                    f.write(str(features.index(feature) + 1)+":"+str(featurevalue) + " ")
             f.write("\n")
     f.close()
 
 #dic = readFileToList(textCutPath, ClassCode, DocumentCount)
 
 # get features from the txt
+
 features = list()
 with open(featurePath, 'r') as f:
     lines = f.readlines()
     for line in lines:
-        feature = line.split(' ')[1].strip('\n')
+        feature = line.split(' ')[1].strip()
         #print feature
         features.append(feature)
-
 # read file to list
 dic = dict()
 
-for eachclass in ClassCodes:
-    path = textCutPath + '/' + eachclass + '_train.txt'
+fList = list()
+if os.path.isdir(textCutPath):
+    files = os.listdir(textCutPath)
+    for f in files:
+        # print f
+        if f != ".DS_Store":
+            fList.append(f[0:7]) 
+
+i = 0
+for f in fList:
+    path = textCutPath + '/' + f + '_train.txt'
     docList = list()
-    with open(path, 'r') as f:
-        lines = f.readlines()
+    with open(path, 'r') as f_train_in:
+        lines = f_train_in.readlines()
         for line in lines:
+            line = line.strip()
             doc = line.split(' ')
             docList.append(doc)
-    dic[eachclass] = docList
+    dic[f[0 : 7]] = docList 
 
-# get the list of idf
 idffeature = featureIDF(dic, features)
-#get tf - idf for features in each class
-TFIDFCal(features, dic,idffeature)
+# #get tf - idf for features in each class
+TFIDFCal(features, dic,idffeature, fList)
 
 
 

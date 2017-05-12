@@ -4,10 +4,9 @@ import sys
 import os
 
 #class id list
-ClassCodes = ['C000013','C000024']
 
-textCutPath = sys.path[0] + '/../Data'
-featurePath = 'knn/model/KNNeature.txt'
+textCutPath = sys.path[0] + "/../Data/dev"
+featurePath = 'knn/model/KNNFeature.txt'
 dffeaturePath = 'knn/model/dffeature.txt'
 tfidfPath = 'knn/model/test.svm'
 
@@ -47,13 +46,13 @@ def readFileToList(textCutPath, ClassCodes):
         dic[eachclass] = eachclasslist
     return dic
 
-def TFIDFCal(features, dic,dffeatures):
+def TFIDFCal(features, dic,dffeatures,fList):
     f = open(tfidfPath, 'w')
     f.close()
     f = open(tfidfPath, 'a')
 
     for eachclass in dic:
-        classIndex = ClassCodes.index(eachclass)
+        classIndex = fList.index(eachclass)
         for doc in dic[eachclass]:
             f.write(str(classIndex)+" ")
             for feature in features:
@@ -70,14 +69,15 @@ def TFIDFCal(features, dic,dffeatures):
 
 # 对200至250序号的文档作为测试集
 #get feature
+
 features = list()
 with open(featurePath, 'r') as f:
     lines = f.readlines()
     for line in lines:
-        feature = line.split(' ')[1].strip('\n')
+        line = line.strip()
+        feature = line.split(' ')[1].strip()
         #print feature
         features.append(feature)
-
 #get df 
 dffeatures = dict()
 with open(dffeaturePath, 'r') as f:
@@ -89,8 +89,15 @@ with open(dffeaturePath, 'r') as f:
 
 # read file to list
 dic = dict()
+fList = list()
+if os.path.isdir(textCutPath):
+    files = os.listdir(textCutPath)
+    for f in files:
+        # print f
+        if f != ".DS_Store":
+            fList.append(f[0:7])
 
-for eachclass in ClassCodes:
+for eachclass in fList:
     path = textCutPath + '/' + eachclass + '_dev.txt'
     docList = list()
     with open(path, 'r') as f:
@@ -100,4 +107,4 @@ for eachclass in ClassCodes:
             docList.append(doc)
     dic[eachclass] = docList
 
-TFIDFCal(features, dic, dffeatures)
+TFIDFCal(features, dic, dffeatures, fList)
